@@ -62,4 +62,4 @@ BBM relies on sphinx+breathe+doxygen to generate documentation.  If all three ar
 make docs
 ```
 
-will produce "docs/sphinx/index.html" in the build directory.
+will produce "docs/html/index.html" in the build directory.
