@@ -30,19 +30,30 @@ if(Doxygen_FOUND)
   set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/config.doxygen)
   set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
 
+  # Print DEBUG INFO
+  message(STATUS "${DOXYGEN_INPUT_DIR}")
+  message(STATUS "${DOXYGEN_OUTPUT_DIR}")
+  message(STATUS "${DOXYFILE_IN}")
+  message(STATUS "${DOXYFILE_OUT}")
+  message(STATUS "${Sphinx_FOUND}")
+  message(STATUS "${READTHEDOCS}")
+  
+
   # if no sphinx is found, setup doxygen as stand-alone
-  if(NOT Sphinx_FOUND AND NOT READTHEDOCS)
-    set(DOXYGEN_GENERATE_TREEVIEW "YES")
-    set(DOXYGEN_GENERATE_XML "NO")
-    set(DOXYGEN_DISABLE_INDEX "NO")
-    set(DOXYGEN_HEADER "")
-    set(DOXYGEN_FOOTER "") 
-  else()
+  if(READTHEDOCS OR Sphinx_FOUND)
+    message(STATUS "Doxygen including Sphinx XML")
     set(DOXYGEN_GENERATE_TREE_VIEW "NO")
     set(DOXYGEN_GENERATE_XML "YES")
     set(DOXYGEN_DISABLE_INDEX "YES")    
     set(DOXYGEN_HEADER "${DOXYGEN_SOURCE_DIR}/docs/header.html")
     set(DOXYGEN_FOOTER "${DOXYGEN_SOURCE_DIR}/docs/footer.html")
+  else()
+    message(STATUS "Stand-alone Doxygen Documentation.")
+    set(DOXYGEN_GENERATE_TREEVIEW "YES")
+    set(DOXYGEN_GENERATE_XML "NO")
+    set(DOXYGEN_DISABLE_INDEX "NO")
+    set(DOXYGEN_HEADER "")
+    set(DOXYGEN_FOOTER "") 
   endif()
 
   # Replace Variables inside @@ with current values
