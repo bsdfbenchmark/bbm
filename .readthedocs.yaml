@@ -16,13 +16,9 @@ build:
     pre_create_environment:
       - ls
       - mkdir build
-      - cd build
+      - cd build ; ls
       - echo "BUILD"
       - ls
-      - echo "PARENT"
-      - ls ..
-      - echo "DOCS"
-      - ls ../docs
     post_build: 
       - ls $READTHEDOCS_OUTPUT/html
       - echo `date`
