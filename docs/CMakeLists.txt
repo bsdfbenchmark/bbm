@@ -31,7 +31,7 @@ if(Doxygen_FOUND)
   set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
 
   # if no sphinx is found, setup doxygen as stand-alone
-  if(NOT Sphinx_FOUND OR READTHEDOCS)
+  if(NOT Sphinx_FOUND AND NOT READTHEDOCS)
     set(DOXYGEN_GENERATE_TREEVIEW "YES")
     set(DOXYGEN_GENERATE_XML "NO")
     set(DOXYGEN_DISABLE_INDEX "NO")
