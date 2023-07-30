@@ -14,8 +14,7 @@ build:
     - cmake
   jobs:
     pre_create_environment:
-      - echo "Command run at 'pre_create_environment' step"
-      - echo $(pwd)
+      - cmake ../docs
     post_build: 
       - echo "Command run at 'post_build' step"
       - echo `date`
