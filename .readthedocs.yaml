@@ -15,7 +15,7 @@ build:
   jobs:
     pre_create_environment:
       - mkdir build
-      - cd build ; cmake ../docs -DREADTHEDOCS=TRUE ; make doxygen ; ls ; ls docs ; mv docs/* $READTHEDOCS_OUTPUT/.
+      - cd build ; cmake ../docs -DREADTHEDOCS=TRUE ; make doxygen ; ls ; ls docs ; ls $READTHEDOCS_OUTPUT/. ; ls docs/html
     post_build: 
       - ls $READTHEDOCS_OUTPUT/html
       - echo `date`
