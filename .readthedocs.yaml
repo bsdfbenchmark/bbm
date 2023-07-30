@@ -15,8 +15,11 @@ build:
   jobs:
     pre_create_environment:
       - ls
-      - doxygen --version
+      - mkdir build
+      - cd buid
       - cmake ../docs
+      - make doxygen
+      - mv docs/html $READTHEDOCS_OUTPUT/html/.
     post_build: 
       - echo "Command run at 'post_build' step"
       - echo `date`
