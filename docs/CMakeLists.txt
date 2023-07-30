@@ -15,8 +15,8 @@ set(DOXYGEN_SOURCE_DIR "${PROJECT_SOURCE_DIR}/..")
 #########################################################################
 # Packages
 #########################################################################
-Find_Package(Doxygen QUIET)
-Find_Package(Sphinx QUIET)
+Find_Package(Doxygen )
+Find_Package(Sphinx )
 
 #########################################################################
 # Setup Doxygen
