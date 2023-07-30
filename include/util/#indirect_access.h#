@@ -1,0 +1,185 @@
+#ifndef _BBM_INDIRECT_ACCESS_H_
+#define _BBM_INDIRECT_ACCESS_H_
+
+#include "concepts/named.h"
+#include "concepts/indirect_access.h"
+#include "util/named.h"
+#include "util/macro_util.h"
+
+/************************************************************************/
+/*! \file indirect_access.h
+
+  \brief Enable indirect access to selected class attributes.
+*************************************************************************/
+
+namespace bbm {
+
+  /**********************************************************************/
+  /*! \brief Main helper macro to add indirect access to a class
+
+    Input: names of the attributes for which indirect access is desired.
+
+    If the attributes of parent classes should be included pass them with the
+    macro 'IncludeIndirect(base_type)'.  If an attribute itself has indirect
+    access, then its attributes can be directly included by passing them as
+    'get_all(attribute)'.
+
+    Example:
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+    struct base { float a; IndirectAccess(a); };
+    struct child : base { float b; IndirectAccess(b, IncludeIndirect(base)); };
+    struct data { child c; IndirectAccess( get_all(c) ); };
+
+    child c;
+    assert( &bbm::get<0>(c) == &(c.b) );   // 'b' was listed as the first in the indirect access list
+    assert( &bbm::get<1>(c) == &(c.a) );   // 'a' was listed second
+    assert( &bbm::get<"a">(c) == &(c.a) ); // access by name "a".
+
+    data d;
+    assert( &bbm::get<1>(c) == &(d.c.b) ); // 'c.b' is listed as the second element in 'c' which is listed as first in 'd'. 
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 
+    If the base class meet concepts::named, then the name of its attributes
+    will be included as "base_attribute". For example:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+    struct base
+    {
+      static constexpr string_literal name = "Base";
+      float a;
+      IndirectAccess(a);
+    };
+
+    struct child : base
+    {
+      IndirectAccess( IncludeIndirect(base) );
+    };
+
+    child c;
+    assert( bbm::get<"Base_a">(c) == &(c.a) );
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Implmentation details: IndirectAccess will create one type alias
+    'indirect_access_t' and a method (a const and a non-const version)
+    'indirect_access_v()'.  The latter returns an object of
+    'indirect_access_t' (for the non-const version) of the attributes.  Access
+    to the attributes are stored as references in a named-tuple (see
+    util/named.h).
+      
+      *******************************************************************/
+  #define IndirectAccess(...)                                            \
+    using indirect_access_t = decltype( bbm::detail::indirect_access_t<BBM_STRINGIFY_EACH(__VA_ARGS__)>(__VA_ARGS__) ); \
+                                                                         \
+    inline constexpr auto indirect_access_v(void)                        \
+    {                                                                    \
+      return bbm::detail::indirect_access_v<BBM_STRINGIFY_EACH(__VA_ARGS__)>(this, __VA_ARGS__); \
+    }                                                                    \
+                                                                         \
+    inline constexpr auto indirect_access_v(void) const                  \
+    {                                                                    \
+      return bbm::detail::indirect_access_v<BBM_STRINGIFY_EACH(__VA_ARGS__)>(this, __VA_ARGS__); \
+    }                                                                    \
+
+  #define IndirectBase(...) (detail::indirect_base<__VA_ARGS__>())
+
+  template<typename PREFIX, typename T> struct prefix {};
+  
+  /*** Implementation Details ***/
+  namespace detail {
+
+    // Indirect base marker
+    template<typename... Ts> struct indirect_base {};
+
+    // Forwarding to attribute
+    template<string_literal NAME, typename T>
+      struct indirect_forward
+    {
+      using type = named<std::tuple<T>, NAME>;
+      template<typename THIS> static inline constexpr auto value(THIS&&, T&& t) { return make_named<NAME>( std::tuple<T>(std::forward<T>(t)) ); }
+    };
+
+    // Forwarding to base_class(es)
+    template<string_literal IGNORE, typename... T>
+      struct indirect_forward<IGNORE, indirect_base<T...>>
+    {
+      using type = bbm::named_cat_t< typename T::indirect_access_t... >;
+
+      template<typename THIS, typename IGNORE_T>
+        static constexpr auto value(THIS&& This, IGNORE_T&&)
+      {
+        if constexpr (bbm::is_const_v<THIS>) return bbm::named_cat(static_cast<const T*>(This)->indirect_access_v()...);
+        else return bbm::named_cat(static_cast<T*>(This)->indirect_access_v()...);
+      }
+    };
+    
+    //! \brief Unevaluable helper method to determine indirect_access_t (concat all indirect_element's named-tuple types)
+    template<bbm::string_literal... NAMES, typename... Ts>
+      inline constexpr decltype( bbm::named_cat( std::declval<typename indirect_forward<NAMES, Ts>::type>()... ) ) indirect_access_t(Ts&& ...) [[unevaluable]];
+
+    //! \brief Helper method for to construct indrect_access_v (concat all eval's of indirect_elements).
+    template<bbm::string_literal... NAMES, typename... Ts, typename THIS>
+      inline constexpr decltype(auto) indirect_access_v(THIS&& This, Ts&&... ts)
+    {
+      return bbm::named_cat( indirect_forward<NAMES,Ts>::value(std::forward<THIS>(This), std::forward<Ts>(ts))... );
+    }
+
+  } // end detail namespace
+
+  
+  /**********************************************************************/
+  /*! @{ \name indirect access type traits
+   **********************************************************************/
+  template<typename T> requires concepts::indirect_access<T>
+    using all_indirect_t = typename std::decay_t<T>::indirect_access_t;
+
+  template<size_t IDX, typename T> requires concepts::indirect_access<T>
+    using indirect_t = std::decay_t< std::tuple_element_t<IDX, all_indirect_t<T>> >;
+  //! @}
+
+  
+  /**********************************************************************/
+  /*! @{ \name Query the names of the indirect accessible attributes
+   **********************************************************************/
+  template<typename T> requires concepts::indirect_access<T>
+    static constexpr auto all_indirect_names = all_indirect_t<T>::names;
+
+  template<size_t IDX, typename T> requires concepts::indirect_access<T>
+    static constexpr auto indirect_name = all_indirect_t<T>::template name<IDX>;
+  //! @}
+
+  
+  /**********************************************************************/
+  /*! \brief Query number of indirect accessible attributes
+   **********************************************************************/
+  template<typename T> requires concepts::indirect_access<T>
+    static constexpr size_t indirect_size = std::tuple_size_v< all_indirect_t<T> >;
+
+  
+  /**********************************************************************/
+  /*! @{ \name Extra-class indirect access methods
+   **********************************************************************/
+  template<typename T> requires concepts::indirect_access<T>
+    inline constexpr decltype(auto) get_all(T&& t)
+  {
+    return t.indirect_access_v();
+  }
+
+  //! \brief Query by index
+  template<size_t IDX, typename T> requires concepts::indirect_access<T>
+    inline constexpr decltype(auto) get(T&& t)
+  {
+    return std::get<IDX>(t.indirect_access_v());
+  }
+
+  //! \brief Query by name
+  template<string_literal NAME, typename T> requires concepts::indirect_access<T>
+    inline constexpr decltype(auto) get(T&& t)
+  {
+    return bbm::get<NAME>(t.indirect_access_v());
+  }
+  //! @}
+  
+
+} // end bbm namespace
+
+#endif /* _BBM_INDIRECT_ACCESS_H_ */ 

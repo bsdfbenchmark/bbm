@@ -1,0 +1,133 @@
+#########################################################################
+# BBM Default CMAKE Config File 
+#########################################################################
+#
+# You can (copy and) alter this configuration file, and use -DBBM_CONFIG=<file> to
+# tell cmake which configuration to use.
+#
+# Compiler specific settings should not be included in this config file but
+# should be stored as presets.
+#
+#########################################################################
+
+
+#########################################################################
+# Main Configuration Options
+#########################################################################
+
+# BBM_NAME: library name; also used as base name for the python module
+#           If not set, the name of the base directory is used.
+#########################################################################
+set(BBM_NAME "bbm")
+
+# BBM_BACKBONE: set the backbone; empty lists available backbone and reverts
+# to using default 'native' backbone.
+#########################################################################
+set(BBM_BACKBONE "native")
+
+# BBM_EXPORTERS: master flag to determine whether to compile exporters
+#                ON/OFF, default = OFF
+#########################################################################
+set(BBM_EXPORTERS OFF)
+
+# BBM_PYTHON: include python support ON/OFF, default = ON
+#########################################################################
+set(BBM_PYTHON OFF)
+
+# BBM_BINARIES: include binaries from bin subdir, default = ON
+#########################################################################
+set(BBM_BINARIES ON)
+
+# BBM_PYTHON_LIBRARY: compile python libraries, default = ON
+#########################################################################
+set(BBM_PYTHON_LIBRARIES OFF)
+
+# PYBIND11_PATH: pybind11 path; by default search in ext/pybind11
+#########################################################################
+#set(PYBIND11_PATH "")
+
+# BBM_PYTHON_CONFIG: list of configuration to export to a stand-alone
+#                    python library. Leave empty to export all
+#########################################################################
+set(BBM_PYTHON_CONFIG "floatRGB" "floatPacketRGB" "floatDiffRGB")
+
+# BBM_BSDF: if BBM_PYTHON is 'OFF' use the BSDF specified in BBM_BSDF in
+#           applications that use the python interpreter to specify a BSDF
+#           (e.g., renderSphere).
+#########################################################################
+set(BBM_BSDF "lambertian<floatRGB>()")
+
+
+
+#########################################################################
+# ENOKI BACKBONE CONFIG
+#########################################################################
+
+# BBM_ENOKI_PATH: path to the enoki library. Search by default in 'ext/enoki.
+#########################################################################
+#set(ENOKI_PATH "")
+
+# ENOKI_AUTODIFF: include enoki autodiff, default = ON
+#########################################################################
+set(ENOKI_AUTODIFF ON)
+
+# ENOKI_CUDA: include enoki cuda support ON/OFF, default = OFF
+#########################################################################
+set(ENOKI_CUDA OFF)
+
+# ENOKI_PYTHON: include enoki python support ON/OFF, default = OFF
+#########################################################################
+set(ENOKI_PYTHON OFF)
+
+
+
+#########################################################################
+# DRJIT BACKBONE CONFIG
+#########################################################################
+
+# BBM_DRJIT_PATH: path to the drjit library. Search by default in 'ext/drjit'.
+#########################################################################
+#set(DRJIT_PATH "")
+
+# DRJIT_AUTODIFF: include enoki autodiff, default = ON
+#########################################################################
+set(DRJIT_AUTODIFF ON)
+
+# DRJIT_JIT: include just-in-time compilation, default = ON
+#########################################################################
+set(DRJIT_JIT ON)
+
+# DRJIT_PYTHON: drjit python extnsion library, default = OFF
+#########################################################################
+set(DRJIT_PYTHON OFF)
+
+# DRJIT_PYTHON_PACKET: drjit python packet extension, default = OFF
+#########################################################################
+set(DRJIT_PYTHON_PACKET OFF)
+
+# DRJIT_BACKBONE: scalar (experimental: LLVM, future: CUDA), default = "scalar"
+#########################################################################
+set(DRJIT_BACKBONE "scalar")
+
+
+#########################################################################
+# BBM MITSUBA (V1) EXPORTER CONFIG
+#########################################################################
+
+# MITSUBA_EXPORTER: enable/disable the exporter, default = ON
+#########################################################################
+set(MITSUBA_EXPORTER ON)
+
+# MITSUBA_PATH: path to mitsuba source. Search by default for mitsuba dir
+#               at the same level as BBM directory
+#########################################################################
+#set(MITSUBA_PATH "")
+
+# MITSUBA_BINARY_PATH: path to the mitsuba compiled executable. Search by
+#                      default in all subdirs of MITSUBA_PATH
+#########################################################################
+#set(MITSUBA_BINARY_PATH "")
+
+# MITSUBA_COMPILER_OPTIONSL additional compiler options.
+#########################################################################
+set(MITSUBA_COMPILER_OPTIONS "")

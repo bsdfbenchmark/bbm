@@ -1,0 +1,49 @@
+{
+   "version": 1,
+   "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 19,
+      "patch": 0
+   },
+   "configurePresets": [
+      {
+          "name": "gcc",
+          "displayName": "GCC",
+          "description": "Default build options for GCC",
+          "generator": "Unix Makefiles",
+          "binaryDir": "${sourceDir}/build",
+          "cacheVariables": {
+              "CMAKE_C_COMPILER": "gcc",
+              "CMAKE_CXX_COMPILER": "g++",
+              "CMAKE_BUILD_TYPE": "RELEASE",
+              "CMAKE_CXX_FLAGS": "-Wno-attributes -Wfatal-errors -flto=auto"
+          }
+      },
+      {
+          "name": "gcc-debug",
+          "displayName": "GCC",
+          "description": "Debug build options for GCC",
+          "generator": "Unix Makefiles",
+          "binaryDir": "${sourceDir}/build",
+          "cacheVariables": {
+              "CMAKE_C_COMPILER": "gcc",
+              "CMAKE_CXX_COMPILER": "g++",
+              "CMAKE_BUILD_TYPE": "DEBUG",
+              "CMAKE_CXX_FLAGS": "-Wno-attributes -Wfatal-errors -flto=auto"
+          }
+      },
+      {
+          "name": "clang",
+          "displayName":  "Clang",
+          "description": "Default build options for Clang",
+          "generator": "Unix Makefiles",
+          "binaryDir": "${sourceDir}/build",
+          "cacheVariables": {
+              "CMAKE_C_COMPILER": "clang",
+              "CMAKE_CXX_COMPILER": "clang++",
+              "CMAKE_BUILD_TYPE": "RELEASE",
+              "CMAKE_CXX_FLAGS": "-Wfatal-errors -Wno-unknown-attributes -flto=auto"
+          }
+      }
+   ]
+}
