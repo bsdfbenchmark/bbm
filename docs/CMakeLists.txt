@@ -30,15 +30,6 @@ if(Doxygen_FOUND)
   set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/config.doxygen)
   set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
 
-  # Print DEBUG INFO
-  message(STATUS "${DOXYGEN_INPUT_DIR}")
-  message(STATUS "${DOXYGEN_OUTPUT_DIR}")
-  message(STATUS "${DOXYFILE_IN}")
-  message(STATUS "${DOXYFILE_OUT}")
-  message(STATUS "${Sphinx_FOUND}")
-  message(STATUS "${READTHEDOCS}")
-  
-
   # if no sphinx is found, setup doxygen as stand-alone
   if(READTHEDOCS OR Sphinx_FOUND)
     message(STATUS "Doxygen including Sphinx XML")
