@@ -63,3 +63,5 @@ make docs
 ```
 
 will produce "docs/html/index.html" in the build directory.
+
+You can find the latest version of the documents on [ReadTheDocs](https://bbm.readthedocs.io/en/latest/index.html).
