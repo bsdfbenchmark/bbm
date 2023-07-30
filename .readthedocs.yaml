@@ -18,15 +18,15 @@ build:
       - mkdir build
       - cd build
       - cmake ../docs
-      - make docs
+      - make doxygen
       - mv docs/html $READTHEDOCS_OUTPUT/html/.
     post_build: 
-      - echo "Command run at 'post_build' step"
+      - ls $READTHEDOCS_OUTPUT/html
       - echo `date`
 
 # Build documentation in the "docs/" directory with Sphinx
-#sphinx:
-#   configuration: docs/conf.py
+sphinx:
+   configuration: docs/conf.py
 
 # Optionally build your docs in additional formats such as PDF and ePub
 # formats:
