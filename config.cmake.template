@@ -36,7 +36,7 @@ set(BBM_PYTHON OFF)
 
 # BBM_BINARIES: include binaries from bin subdir, default = ON
 #########################################################################
-set(BBM_BINARIES ON)
+set(BBM_BINARIES OFF)
 
 # BBM_PYTHON_LIBRARY: compile python libraries, default = ON
 #########################################################################
