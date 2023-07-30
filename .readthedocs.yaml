@@ -16,9 +16,8 @@ build:
     pre_create_environment:
       - ls
       - mkdir build
-      - cd build ; ls
-      - echo "BUILD"
-      - ls
+      - cd build ; cmake ..docs ; make doxygen
+      - ls buid/docs/html
     post_build: 
       - ls $READTHEDOCS_OUTPUT/html
       - echo `date`
