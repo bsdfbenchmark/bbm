@@ -14,6 +14,8 @@ build:
     - cmake
   jobs:
     pre_create_environment:
+      - ls
+      - doxygen --version
       - cmake ../docs
     post_build: 
       - echo "Command run at 'post_build' step"
