@@ -17,9 +17,12 @@ build:
       - ls
       - mkdir build
       - cd build
-      - cmake ../docs
-      - make doxygen
-      - mv docs/html $READTHEDOCS_OUTPUT/html/.
+      - echo "BUILD"
+      - ls
+      - echo "PARENT"
+      - ls ..
+      - echo "DOCS"
+      - ls ../docs
     post_build: 
       - ls $READTHEDOCS_OUTPUT/html
       - echo `date`
