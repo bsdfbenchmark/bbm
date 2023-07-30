@@ -16,7 +16,7 @@ build:
     pre_create_environment:
       - ls
       - mkdir build
-      - cd build ; cmake ../docs ; make doxygen
+      - cd build ; cmake ../docs -DREADTHEDOCS ; make doxygen
       - mv build/docs/* $READTHEDOCS_OUTPUT/.
     post_build: 
       - ls $READTHEDOCS_OUTPUT/html
