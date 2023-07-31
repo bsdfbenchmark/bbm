@@ -56,12 +56,12 @@ make
 
 ## Documentation
 
-BBM relies on sphinx+breathe+doxygen to generate documentation.  If all three are installed, then
+BBM relies on sphinx+breathe+doxygen to generate documentation.  If all three are installed, and the above cmake makefile generation was succesful, then running the following in the "build" directory:
 
 ```
 make docs
 ```
 
-will produce "docs/html/index.html" in the build directory.
+will produce "docs/html/index.html" in the "build" directory.
 
 You can find the latest version of the documents on [ReadTheDocs](https://bbm.readthedocs.io/en/latest/index.html).
