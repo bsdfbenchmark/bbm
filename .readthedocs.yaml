@@ -18,6 +18,7 @@ build:
       - cd $READTHEDOCS_OUTPUT ; cmake ../docs -DREADTHEDOCS=TRUE ; make doxygen
       - echo "breathe_projects=\{\}" >> docs/conf.py
       - cat docs/conf.py
+      - ls html
     post_build: 
       - ls $READTHEDOCS_OUTPUT/html
       - echo `date`
