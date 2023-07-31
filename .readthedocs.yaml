@@ -15,8 +15,8 @@ build:
   jobs:
     pre_create_environment:
       - mkdir $READTHEDOCS_OUTPUT
-      - cd $READTHEDOCS_OUTPUT ; cmake ../docs -DREADTHEDOCS=TRUE ; make doxygen
-      - echo "breathe_projects=\{\}" >> docs/conf.py
+      - cd $READTHEDOCS_OUTPUT ; #cmake ../docs -DREADTHEDOCS=TRUE ; make doxygen
+      - echo "breathe_projects={\"bbm\": \"html/doxygen/xml\"}" >> docs/conf.py
       - cat docs/conf.py
       - ls html
     post_build: 
