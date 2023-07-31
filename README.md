@@ -56,7 +56,7 @@ make
 
 ## Documentation
 
-BBM relies on sphinx+breathe+doxygen to generate documentation.  If all three are installed, and the above cmake makefile generation was succesful, then running the following in the "build" directory:
+BBM relies on sphinx (>= 6.2) + breathe + doxygen (>= 1.9.4) to generate documentation.  If all three are installed, and the above cmake makefile generation was succesful, then running the following in the "build" directory:
 
 ```
 make docs
@@ -64,4 +64,4 @@ make docs
 
 will produce "docs/html/index.html" in the "build" directory.
 
-You can find the latest version of the documents on [ReadTheDocs](https://bbm.readthedocs.io/en/latest/index.html).
+You can also find the latest version of the documents on [ReadTheDocs](https://bbm.readthedocs.io/en/latest/index.html).
