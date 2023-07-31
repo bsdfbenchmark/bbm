@@ -43,13 +43,13 @@ with BBM.
 ~~~~~~~~~~~~~~
 
 This boolean option will enable embedded python support.  Note this will not produce
-the python libraries (see ``BBM_PYTHON_LIBRARIES``).
+the python libraries (see ``BBM_PYTHON_LIBRARIES``). This requires ``pybind11`` to be installed.
 
 ``BBM_PYTHON_LIBRARIES``
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 This boolean option will compile python libraries of BBM.  Multiple version will be
-compiled (see ``BBM_PYTHON_CONFIG``).
+compiled (see ``BBM_PYTHON_CONFIG``).  This requires ``pybind11`` to be installed.
 
 ``BBM_PYTHON_CONFIG``
 ~~~~~~~~~~~~~~~~~~~~~
