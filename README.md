@@ -51,7 +51,8 @@ The basic prerequisites are: cmake (>= 3.21) and a C++20 compatible compiler.
 mkdir build
 cd build
 cmake .. -DBBM_BINARIES=ON
-make
+make bbm_info
+./bbm_info
 ```
 
 ## Documentation
