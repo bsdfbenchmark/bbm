@@ -8,6 +8,8 @@ version: 2
 # Set the OS, Python version and other tools you might need
 build:
   os: ubuntu-22.04
+  conda:
+    environment: docs/environment.yml
   tools:
     python: "3.11"
   apt_packages:
