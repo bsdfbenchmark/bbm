@@ -65,7 +65,7 @@ make docs
 
 will produce "docs/html/index.html" in the "build" directory.
 
-You can also find the latest version of the documents on [ReadTheDocs](https://bbm.readthedocs.io/en/latest/index.html).
+You can also find the documentation on [ReadTheDocs](https://bbm.readthedocs.io/en/latest/index.html).
 
 ## Support
 
