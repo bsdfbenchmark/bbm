@@ -85,6 +85,8 @@ namespace bbm {
   /*! \brief The directional specular component of the He et al. BSDF model
 
     \tparam CONF = bbm configuration
+    \tparam Fresnel = fresnel implementation (requires concepts::fresnel);
+                      default = fresnel::complex
     \tparam EQ25 = determines whether or not to include an extra
                    scaling factor in Eq 25. (Default = he_eq25::WithoutExp)
     \tparam EQ78 = determines which implementation variant to follow for Eq
@@ -111,13 +113,14 @@ namespace bbm {
     Implements: concepts::bsdfmodel
   ***********************************************************************/
   template<typename CONF,
+           typename Fresnel=fresnel::complex<CONF, Spectrum_t<CONF>>,
            he_eq25 EQ25=he_eq25::WithoutExp,
            he_eq78 EQ78=he_eq78::Regular,
            size_t NewtonRaphsonSteps=4,
            size_t TaylorTerms=40,
            bool AdaptiveTaylor=true,
            literal RoughApproxThreshold=std::numeric_limits<Scalar_t<CONF>>::max(),
-           string_literal NAME="He"> requires concepts::config<CONF>
+           string_literal NAME="He"> requires concepts::config<CONF> && concepts::fresnel<Fresnel> && concepts::matching_config<CONF, Fresnel>
     class he_base
   {
   public:
@@ -157,7 +160,7 @@ namespace bbm {
 
       // Fresnel
       Value cosThetaHalf = bbm::safe_sqrt( (1 + bbm::dot(in, out)) / 2.0 );
-      Spectrum F_term = fresnel::complex<Config,Spectrum>::eval(eta, cosThetaHalf, mask);
+      Spectrum F_term = Fresnel::eval(eta, cosThetaHalf, mask);
 
       // normalization
       Value normalization = bbm::rcp( Constants::Pi() * spherical::cosTheta(in) * spherical::cosTheta(out) );
@@ -230,7 +233,7 @@ namespace bbm {
       if(bbm::none(mask)) return 0;      
       
       // Approximate as perfect mirror
-      return fresnel::complex<Config,Spectrum>::eval(eta.value(), vec::z(out), mask) / Constants::Pi() * 4.0;
+      return Fresnel::eval(eta.value(), vec::z(out), mask) / Constants::Pi() * 4.0;
     }
 
   private:
@@ -467,9 +470,9 @@ namespace bbm {
     ///////////////////////////////
     //! @{ \name Class Attributes
     ///////////////////////////////
-    bsdf_parameter<Value, bsdf_attr::SpecularParameter, 0.18> roughness;
-    bsdf_parameter<Value, bsdf_attr::SpecularParameter, 3.0> autocorrelation;
-    fresnel_parameter<ior::complex_ior<Spectrum>> eta;
+    bsdf_parameter<Value, bsdf_attr::SpecularParameter, 0.18> roughness;       // sigma
+    bsdf_parameter<Value, bsdf_attr::SpecularParameter, 3.0> autocorrelation;  // tau
+    fresnel_parameter<typename std::decay_t<Fresnel>::parameter_type> eta;
 
     BBM_ATTRIBUTES(roughness, autocorrelation, eta);
     //! @}
@@ -484,13 +487,13 @@ namespace bbm {
   /*! @{ \name He BSDF Variants with data-driven importance sampling
    **********************************************************************/
   template<typename CONF, string_literal NAME="He"> requires concepts::config<CONF>
-    using he = ndf_sampler<he_base<CONF, he_eq25::WithoutExp, he_eq78::Regular, 4, 64, true, 18>, 90, 1, NAME>;
+    using he = ndf_sampler<he_base<CONF, fresnel::complex<CONF, Spectrum_t<CONF>>, he_eq25::WithoutExp, he_eq78::Regular, 4, 64, true, 18>, 90, 1, NAME>;
   
   template<typename CONF, string_literal NAME="HeWestin"> requires concepts::config<CONF>
-    using hewestin = ndf_sampler<he_base<CONF, he_eq25::Errata, he_eq78::Westin, 4, 64, true, 18>, 90, 1, NAME>;
+    using hewestin = ndf_sampler<he_base<CONF, fresnel::complex<CONF, Spectrum_t<CONF>>, he_eq25::Errata, he_eq78::Westin, 4, 64, true, 18>, 90, 1, NAME>;
 
   template<typename CONF, string_literal NAME="HeHolzschuch"> requires concepts::config<CONF>
-    using heholzschuch = ndf_sampler<he_base<CONF, he_eq25::Errata, he_eq78::Regular, 4, 10, false>, 90, 1, NAME>;
+    using heholzschuch = ndf_sampler<he_base<CONF, fresnel::complex<CONF, Spectrum_t<CONF>>, he_eq25::Errata, he_eq78::Regular, 4, 10, false>, 90, 1, NAME>;
   //! @}
   
 } // end bbm namespace
