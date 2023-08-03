@@ -15,11 +15,8 @@ def import_fits(filename, m):
 
     # create dict
     globalDict = {}
-    if m != None:
-        for d in dir(m):
-            globalDict[d] = getattr(m, d)
-    else:
-        globalDict = None
+    for d in dir(m):
+        globalDict[d] = getattr(m, d)
 
     # create dict of results
     fits = {}
@@ -34,7 +31,7 @@ def import_fits(filename, m):
             key = line[0:split-1].strip()
             val = line[split+1:-1].strip()
 
-            fits[key] = eval(val, globalDict)
+            fits[key] = eval(val, None, globalDict)
 
     # Done
     return fits
