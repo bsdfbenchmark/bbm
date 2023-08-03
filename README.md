@@ -19,7 +19,7 @@ for documentation generation.
   
 BBM is still under development. BBM currently (version 0.5.0, July 2023) supports:
 
-* 31 BSDF and variants reference implementations (evaluation and importance sampling)
+* 32 BSDF and variants reference implementations (evaluation and importance sampling)
 * support for reading the MIT-MERL measured BSDFs
 * python bindings for BSDF models
 * a plugin for Mitsuba 1 (RGB and homogeneous BSDFs only)
