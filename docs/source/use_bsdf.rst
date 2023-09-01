@@ -5,8 +5,19 @@ bbm::bsdfmodel
 --------------
 
 At the core of BBM's BSDF implementation lies the ``bsdfmodel`` concept.
-Consider the following example (we assume ``BBM_IMPORT_CONFIG`` and ``use
-namespace bbm`` has been executed in the current scope):
+Consider the following example (we assume ``bbm.h`` has been included, and
+``BBM_IMPORT_CONFIG`` and ``use namespace bbm`` have been executed in the
+current scope):
+
+.. note::
+
+   ``bbm.h`` includes all necessary header files as well as _all_ BSDF models.
+   If it is known beforehand which (subset) of BSDF models will be used then,
+   one can instead of including all via ``bbm.h``, or set the
+   ``BBM_BSDFMODELS`` configuration variables in ``config.cmake`` to only
+   include the desired models.  In the latter case, no change is needed
+   (include ``bbm.h``). In the former case, include ``bbm_core.h``, followed
+   by the desired bsdf models, followed by ``bsdf_string_convert.h``.
 
 .. code-block:: c++
 
@@ -246,4 +257,14 @@ be:
    Direct access to the BSDF attributes is part of the 'wish list' for future
    versions of BBM.
 
+   
+.. warning::
+
+   Argument passing to the bsdf methods (``eval``, ``sample``, ``pdf``, and
+   ``reflectance``) currently requires follows the enoki/drjit convention,
+   which is suboptimal for differentiable and packet types. For example
+   ``bbm_floatDiffRGB`` would expect a spectrum to be passed as ``[[r,g,b]]``
+   (note the double `[[` and `]]`).  Making passing of arguments consistent
+   between different configurations is also part of the 'wish list' for future
+   revisions of BBM.
    

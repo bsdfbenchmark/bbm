@@ -240,3 +240,49 @@ An example of an optimization algorithm is ``bbm::compass``:
 
 When implementing a new optimization algorithm, care must be taken to ensure
 that the implementation is compatible with packet types.
+
+
+Fit files
+=========
+
+To store and exhange BSDF fits, BBM uses a simple text based format.  In this
+format lines with comments start with ``#``.  Each material fit is stored as:
+``name = model(parameters``, where ``name`` is a unique identifier (e.g., the
+material name), ``model(parameters)`` is what you would see when the ``str``
+method in Python is called on the model or the output of ``bbm::toString``.
+We refer the ``fits`` subdirectory for examples.  To import the BSDF fits in
+python:
+
+.. code-block:: python
+
+   import bbm_floatRGB as bbm
+   from import_fits import *
+   fits = import_fits('fits/ngan_ward.fit', bbm)
+   str(fits['alum-bronze'])
+
+The 3rd line, reads the ``fits/ngan_ward.fit`` file, and imports the fits into
+a dictionary (called ``fits``).  This dictionary contains the BSDF fits with
+the key the name of the MERL material, and the value the corresponding BSDF
+(defined in the Python ``bbm`` namespace).
+
+In ``C++`` we can use the ``bbm::io::importFIT`` method:
+
+.. doxygenfunction:: bbm::io::importFIT
+
+For example:
+
+.. code-block:: c++
+
+   #include "io/fit.h"
+
+   // ....
+   
+   std::map<std::string, bsdf_ptr<Config>> fits;
+   bbm::io::importFIT("filename.fit", fits);
+   std::cout << fits["alum-bronze"] << std::endl;
+
+Similarly, one can export an ``std::map`` of fits using the ``bbm::exportFIT``
+method:
+
+.. doxygenfunction:: bbm::io::exportFIT
+

@@ -10,6 +10,6 @@ the key concepts such as named arguments, reflection, attributes, and
    :maxdepth: 1
 
    string_literal
-   named
    tuple
+   named
    reference

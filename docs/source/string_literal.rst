@@ -1,8 +1,10 @@
 bbm::string_literal
 ===================
 
-A string literal (``include/util/string_literal.h``) is a compile-time ``constexpr`` string implementation.
-It is used extensively in BBM to pass constexpr strings as a template literal.
+A string literal (`include/util/string_literal.h
+<../doxygen/html/literal_8h_source.html>`_) is a compile-time ``constexpr``
+string implementation.  It is used extensively in BBM to pass constexpr
+strings as a template literal.
 
 .. code-block:: c++
 
@@ -40,8 +42,10 @@ defined as ``auto``.
 A type trait ``bbm::is_string_literal_v`` has been defined to detect
 string literals (e.g., when using ``auto`` as template type).
 
-Finally, ``include/util/to_string_literal.h" contains a ``constexpr``
-implementation to convert a (integer) literal to a ``string_literal``:
+Finally, `include/util/to_string_literal.h
+<../doxygen/html/to__string__literal_8h_source.html>`_ contains a
+``constexpr`` implementation to convert a (integer) literal to a
+``string_literal``:
 
 .. doxygenfunction:: bbm::to_string_literal
 

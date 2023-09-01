@@ -2,15 +2,17 @@ Tools
 =====
 
 BBM offers a few tools that can be helpful when implementing and validating a
-BSDF model.  All tools leverage the embedded python interpreter to allow the
-user to specify the bsdfmodel.
+BSDF model. All tools require that the user passes a bsdf in the form of a
+string.  The exact parser used depends on the ``BBM_DEFAULT_BSDF_IMPORTER``
+configuration variable.
+
 
 renderSphere
 ------------
 
 .. code-block:: none
  
-   Usage: ./renderSphere [bsdfmodel=<python string>] [filename=<name>] [light=[0,0,1]] [width=512] [height=512]
+   Usage: ./renderSphere [bsdfmodel=<bsdf string>] [filename=<name>] [light=[0,0,1]] [width=512] [height=512]
 
 
 Render an image of a sphere with a given ``bsdfmodel`` lit by a directional
@@ -27,7 +29,7 @@ plotBsdf
 
 .. code-block:: none
 
-   Usage: ./plotBsdf [bsdfmodel=<python string>] [filename=<name>] [width=512] [height=256] [view=[0,0,1]] [samples=1] [scale=1] [maskZero] [plot=<eval|pdf|sample>]
+   Usage: ./plotBsdf [bsdfmodel=<bsdf string>] [filename=<name>] [width=512] [height=256] [view=[0,0,1]] [samples=1] [scale=1] [maskZero] [plot=<eval|pdf|sample>]
 
 Will plot a BSDF (specified by ``bsdfmodel``) for a given ``view`` direction
 (default is ``[0,0,1]``) in latitude-longitude format (with resultion
@@ -52,7 +54,7 @@ This tool offers a number of numerical validations of the Bsdf.
 
 .. code-block:: none
 
-   Usage: ./checkBsdf [bsdfmodel=<python string>] test=<test name> [test options]
+   Usage: ./checkBsdf [bsdfmodel=<bsdf string>] test=<test name> [test options]
    + test=reflectance [samples=100000] [theta=1] [importanceSampling]: compare the approximated reflectance method with a MC integration of the BSDF.
    + test=reciprocity [samples=100000]: checks if the BSDF is symmetric for 'samples' random dirctions.
    + test=adjoint [samples=100000]: checks if the adjoint BSDF is equal to the BSDF with in/out swapped.

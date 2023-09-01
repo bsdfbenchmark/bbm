@@ -7,8 +7,8 @@ specialization:
 
 .. doxygenstruct:: bbm::microfacet
 
-This bsdfmodel will given a `microfacet normal distribution`_, a `masking and
-shadowing`_ implementation, a `Fresnel`_ implementation, a normalization
+This bsdfmodel will be defined a `microfacet normal distribution`_, a `masking
+and shadowing`_ implementation, a `Fresnel`_ implementation, a normalization
 factor, and a name.  The normalization factor is provided by:
 
 .. doxygenstruct:: bbm::microfacet_n
@@ -16,12 +16,12 @@ factor, and a name.  The normalization factor is provided by:
    :members:
    :outline:
       
-The default is ``microfacet_n::Unnormalized``. This corresponds to the
-normalization in the Cook-Torrance microfacet BRDF model (the division by PI
-in this model is actually the normalization of the normal facet
-distribution).  ``microfacet_n::Walter`` corresponds to the additional
-normalization by 4 as proposed by Walter et al. in `Microfacet Models for
-Refraction through Rough Surfaces <http://dx.doi.org/10.2312/EGWR/EGSR07/195-206>`_.
+The default is ``microfacet_n::Unnormalized``. This ``microfacet_n::Cook``
+corresponds to the normalization in the Cook-Torrance microfacet BRDF model,
+i.e., a division by PI.  ``microfacet_n::Walter`` corresponds to the
+additional normalization by 4 as proposed by Walter et al. in `Microfacet
+Models for Refraction through Rough Surfaces
+<http://dx.doi.org/10.2312/EGWR/EGSR07/195-206>`_.
 
 Fresnel
 -------
@@ -126,7 +126,7 @@ Next we add the four required functions:
 
 In contrast to a ``bsdfmodel``, an ``ndf`` we opted not to support named
 arguments for the four methods as the signatures of the methods are short and
-they do not include many optional parameters. However, BMM does require named
+they do not include many optional parameters. However, BBM does require named
 arguments for the constructor.
                 
 The ``eval`` method evaluates the NDF given a ``halfway`` vector:
@@ -234,7 +234,7 @@ BRDF model <https://doi.org/10.1145/357290.357293>`_:
 .. code-block:: c++
 
   template<typename CONF, string_literal NAME = "CookTorrance"> requires concepts::config<CONF> 
-  using cooktorrance = scaledmodel<microfacet<ndf::beckmann<CONF, symmetry_v::Isotropic>,
+  using cooktorrance = scaledmodel<microfacet<ndf::beckmann<CONF,  symmetry_v::Isotropic, false>,
                                               maskingshadowing::vgroove<CONF>,
                                               fresnel::cook<CONF>,
                                               microfacet_n::Cook,
@@ -243,7 +243,8 @@ BRDF model <https://doi.org/10.1145/357290.357293>`_:
 
   BBM_CHECK_CONCEPT(concepts::bsdfmodel, cooktorrance<config>);
 
-In this case the model consists of a ``ndf::beckmann`` distribution, a
+In this case the model consists of an unnormalized (``false``) isotropic
+(``symmetry_v::Isotropic``) ``ndf::beckmann`` distribution, a
 ``maskingshadowing::vgroove`` and the ``fresnel::cook`` functions.  Because an
 ndf is typically normalized, and thus does not contain an 'albedo' factor, we
 wrap the microfacet bsdfmodel in a ``scaledmodel`` which is a ``bsdfmodel`` by
@@ -267,4 +268,14 @@ For non-microfacet models, a similar numerical sampling approximation
 exists. ``bbm::ndf_sampler`` wraps around an existing ``bsdfmodel`` and
 constructs a numerical NDF by sampling the underlying ``bsdfmodel`` as if it
 was a microfacet model (i.e., it samples halfway vectors (in == out) over the
-hemisphere).
+hemisphere).  For example, the He et al. bsdf model has no known importance
+sampling method.  BBM resolves this by wrapping the bsdfmodel implementation
+(``he_base`` with a placeholder diffuse importance sampler) in an
+ndf_sampler:
+
+.. code-block:: c++
+
+   template<typename CONF, string_literal NAME="He"> requires concepts::config<CONF>
+    using he = ndf_sampler<he_base<CONF, ...>, 90, 1, NAME>;
+
+Note for clarity we omit the various template arguments passed to ``he_base``.

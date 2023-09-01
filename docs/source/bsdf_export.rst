@@ -18,15 +18,10 @@ top-level ``include/bbm.h``.
 
 .. note::
 
-   BBM's cmake script auto-generates three header files. Two of these files are
-   ''include/bbm_bsdfmodel.h`` and ``include/bbm_staticmodel.h`` that include
-   all header files in the ``include/bsdfmodel`` and ``include/staticmodel``
-   directories.
-
-   The final file is ``include/bbm.h`` that import the previous two generated
-   files and ``include/bbm/bbm_core.h``, and which is the file a programmer
-   should include to setup bbm.
-
+   BBM's cmake script auto-generates a ``bbm_bsdfmodels`` header file that
+   includes all bsdf models listed in the configuration variable
+   ``BBM_BSDFMODELS``.
+   
 
 If, after the initial inclusion of the BSDF models, we include the BSDF models
 again, then anything *inside* the guards will not be parsed.  However, the
@@ -41,15 +36,14 @@ names of all the available BSDF models:
   std::vector<std::string> bsdflist;
   #undef BBM_EXPORT_BSDFMODEL
   #define BBM_EXPORT_BSDFMODEL(bsdfmodel) bsdflist.push_back( bsdfmodel<bbm::floatRGB>::name.value );
-  #include "bbm_bsdfmodel.h"
-  #include "bbm_staticmodel.h"
+  #include "bbm_bsdfmodels.h"
   #include "export/clear_export.h"
 
 This example, first creates a vector ``bsdflist`` to store all the names. Next
 we undefine BBM_EXPORT_BSDFMODEL to avoid any clashes, followed by a
 definition of a new exporter that pushes back the name of each model on
 ``bsdflist``.  Next we iterate through all models by including
-``bbm_bsdfmodel.h`` and ``bbm_staticmodel.h``.  These two lines will do the
+``bbm_bsdfmodels.h``.  This include will do the
 actual population of the vector.  Finally, we clear ``BBM_BSDF_EXPORT`` using
 ``export/clear_export.h``.  This last step is needed in case any of the models
 is explicitely included again in another part of the code.

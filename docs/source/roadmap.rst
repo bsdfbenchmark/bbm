@@ -6,14 +6,15 @@ versions (subject to change) as well as unscheduled plans for longer term
 changes:
 
 
-Version 0.5.1
--------------
-  
-+ Packet support for DRJIT
-+ Python support for DRJIT
-  
-  
 Version 0.5.2
+-------------
+
++ Improvements to Python interface for passing parameters to differentiable and packet types.
++ Packet support for DRJIT
++ Better Python support for DRJIT
+  
+  
+Version 0.5.3
 -------------
 
 + Holzschuch and Pacaknowski's `two-scale microfacet reflectance model
@@ -22,9 +23,8 @@ Version 0.5.2
 + The 'Dinsey BSDF model
   <https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf>_
 
-+ Support for importing prior BSDF fitting results
   
-Version 0.5.3
+Version 0.5.4
 -------------
 
 + More robust auto-diff support with DRJIT and Enoki
@@ -48,8 +48,6 @@ Not yet scheduled/wish-list
 ---------------------------
 
 + Improved Python support; allow for Python BSDF
-
-+ String-based serialization of BSDF models and parameters
 
 + DRJIT/Enoki GPU support
   

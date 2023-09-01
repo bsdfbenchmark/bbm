@@ -59,9 +59,9 @@ While more to complex to write, it is more generic; the method will now work
 for any struct which reflects its attributes.
 
 BBM implements a light-weight compile-time reflection mechanism that supports
-reflection of attributes and base classes.  Currently not supported are member
-functions.  Before detailing how reflection is implemented, we first explore
-how to use it.
+reflection of attributes, base classes, and enum classes.  Currently not
+supported are member functions.  Before detailing how reflection is
+implemented, we first explore how to use it.
 
 Usage
 -----
@@ -116,7 +116,7 @@ functionality that also works in unevaluated contexts:
       using A_t = BBM_ATTRIBUTES_T;  // using attributes_t<foo1> here throws an error.
    };
    
-BBM reflection also allows for includes the attributes of an attribute:
+BBM reflection also allows for including the attributes of an attribute:
 
 .. code-block:: c++
 
@@ -204,6 +204,37 @@ by its name (using ``bbm::get<"name">``).  If unique names are required, then
    the reflection of the outer class is copied, which might not produce the
    desired result.
 
+Enumeration
+~~~~~~~~~~~
+
+BBM also include reflection tools for enum classes:
+
+.. code-block:: c++
+
+   enum struct fooEnum
+   {
+     first = 1,
+     second = 10,
+     third = 100
+   };
+
+   BBM_ENUM(fooEnum, first, second, third);
+
+   std::cout << bbm::toString( enum_v<fooEnum>[1] ) << std::endl; // 'second'
+   for(auto a : enum_v<fooEum>) std::cout << bbm::toString(a) << std::endl; // 'first', 'second', 'third'
+
+To add reflection, we add *outside* the enum struct a call to ``BBM_ENUM``
+with the enum type name as first argument, followed by all the enumeration
+names.  We can then querry the the enumeration values with ``enum_v`` which
+will return a named std::array with the values as elements in the array, and
+the enumeration names as name.
+
+.. note::
+
+   The default ``stringconvert`` implementation checks if a enumeration type
+   has reflection, and specializes ``bbm::toString`` and ``bbm::fromString``
+   accordinly.
+   
 Implementation Details
 ----------------------
 
@@ -269,7 +300,7 @@ additional ``bbm::named_cat``:
 Usage in BBM
 ------------
 
-Reflection is used in three ways in BBM.
+Reflection is used in four ways in BBM.
 
 1. the methods ``parameter_values``, ``parameter_default_values``,
    ``parameter_lower_bound``, and ``parameter_upper_bound`` relies on
@@ -287,3 +318,7 @@ Reflection is used in three ways in BBM.
 3. ``BBM_DEFAULT_CONSTRUCTOR`` leverages reflection to create the argument
    list for the constructor, and to copy the arguments to each of the
    reflected attributes.
+
+4. ``bbm::toString`` and ``bbm::fromString`` will leverage reflection to
+   serialize and deserialize a type with reflection support.  Note:
+   deserialization requires that the type is also trivially constructible.

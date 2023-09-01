@@ -14,3 +14,7 @@ Additional optional requirements are:
 * DrJIT: for CPU and LLVM based autodiff (experimental) support; 
 * doxygen: for API document generation
 * sphinx and sphinx_rtd_theme: for generating this documentation
+
+The easiest way to include external libraries such as enoki or DrJIT is to
+clone them from their respective repositories into the ``ext`` subdirectory in
+the bbm main directory.

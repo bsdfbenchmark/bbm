@@ -23,46 +23,49 @@ command should provide basic information about BBM:
                 
                ./bbm_info
 
-Version 0.5.0 of BBM outputs:
+Version 0.5.1 of BBM outputs:
 
 .. code-block:: none
 
-  BBM_NAME = 'bbm' using 'native' backbone and compiled with NO python support.
-  31 BSDF models supported:
-  + AshikhminShirley
-  + AshikhminShirleyFull
-  + Bagher
-  + CookTorrance
-  + CookTorranceHeitz
-  + CookTorranceWalter
-  + GGX
-  + GGXHeitz
-  + He
-  + HeWestin
-  + HeHolzschuch
-  + Lafortune
-  + Lambertian
-  + LowMicrofacet
-  + LowMicrofacetSup
-  + LowSmooth
-  + NganWard
-  + NganWardDuer
-  + NganBlinnPhong
-  + NganLafortune
-  + NganCookTorrance
-  + NganAshikhminShirley
-  + NganHe
-  + OrenNayar
-  + Phong
-  + PhongWalter
-  + Ribardiere
-  + RibardiereAnisotropic
-  + Ward
-  + WardDuer
-  + WardDuerGeislerMoroder
-  1 static (measured) BSDFs supported:
-  + Merl
-
+ BBM_NAME = 'bbm' using 'native' backbone and compiled with NO python support.
+ 34 BSDF models supported:
+ + AshikhminShirley
+ + AshikhminShirleyFull
+ + Bagher
+ + CookTorrance
+ + CookTorranceHeitz
+ + CookTorranceWalter
+ + GGX
+ + GGXHeitz
+ + He
+ + HeWestin
+ + HeHolzschuch
+ + EPD
+ + Lafortune
+ + Lambertian
+ + LowAshikhminShirley
+ + LowCookTorrance
+ + LowMicrofacetFit
+ + LowMicrofacet
+ + LowSmooth
+ + NganWard
+ + NganWardDuer
+ + NganBlinnPhong
+ + NganLafortune
+ + NganCookTorrance
+ + NganAshikhminShirley
+ + NganHe
+ + OrenNayar
+ + Phong
+ + PhongWalter
+ + Ribardiere
+ + RibardiereAnisotropic
+ + Ward
+ + WardDuer
+ + WardDuerGeislerMoroder
+ 1 Static BSDF models supported:
+ + Merl
+ 
 
 Stand-alone BBM Project
 -----------------------

@@ -22,7 +22,7 @@ object (essentially, it wraps a pointer to the object).  However,
 
 1. the reference cannot refer to nothing.  While this seems like a good thing
    (avoiding ``null_ptr``). It can cause issues when creating arrays of
-   references that are iteratively setup.
+   references that are iteratively initialized.
 
 2. ``std::reference_wrapper`` cannot handle rvalues, where as regular
    references can:

@@ -84,7 +84,7 @@ Named tuples are a key component in BBM. Basic operations are:
 
    auto [m, v] = bbm::pick<"valid", "value">(pc); // m = true, v = 0.330000
    
-Note that when using ``pick`` that the order of the names to lookup does not
+Note that when using ``pick``, the order of the names to lookup does not
 need to correspond to the order in the named tuple, nor does every name need
 to be retrieved.  In general, named lookups (i.e., ``bbm::get`` and
 ``bbm::pick``) are preferred since they make it clear what is looked up, plus

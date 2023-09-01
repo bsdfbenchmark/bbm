@@ -35,8 +35,8 @@ convention, each ``bsdfmodel`` takes a bbm config as its first template
 argument (we use ``concepts::config`` to ensure it is a valid config).  Most
 ``bsdfmodel`` structs also take a ``string_literal`` to set the name of the
 object.  This name will be used for exporting the ``bsdfmodel`` and for
-automatically creating a human-readable object-to-string.  We template the
-bsdfmodel name to allow for specializations or aliases with different names.
+serialization/deserialization.  BBM often templates the bsdfmodel name to
+allow for specializations or aliases with different names.
 
 At the top of the ``bsdfmodel`` we import the config (``BBM_IMPORT_CONFIG``)
 and set a ``static constexpr string_literal name``.
@@ -116,8 +116,8 @@ and the complex index of refraction.
 
 To support easy access and abstraction of higher-level methods, BBM relies on
 compile-time reflection.  Currently, BBM supports reflection of class
-attributes and class-inheritance.  To add attribute reflection, we use the
-macro:
+attributes and class-inheritance, and of enumeration types.  To add attribute
+reflection, we use the macro:
 
 .. code-block:: c++
 
@@ -135,14 +135,14 @@ by invoking the macro:
 
 The default constructor includes:
 
-* Set up the constructor arguments to reflect the attributes (in type *and* order);
-* Set up the default value of the constructor arguments to their
+* Setting up the constructor arguments to reflect the attributes (in type *and* order);
+* Setting up the default value of the constructor arguments to their
   ``default_value`` as specified in by ``bsdf_parameter``;
-* Add support for named constructor arguments (i.e., "argument_name"_arg =
+* Adding support for named constructor arguments (i.e., "argument_name"_arg =
   ...);
-* Executes the `<constructor body>` after setting the values of the class
+* Executing the `<constructor body>` after setting the values of the class
   attributes.  In most cases (as is in the example above) this body is empty;
-* Set up a typedef ``constructor_args_t`` that describes the arguments of the
+* Seting up a typedef ``constructor_args_t`` that describes the arguments of the
   constructor.  For example:
   
   .. code-block:: c++
@@ -158,6 +158,19 @@ The default constructor includes:
   where the lambda function sets the default argument value (``Spectrum(0.5,
   0.5, 0.5)`` in this case).
 
+.. note::
+
+   Serialization and deserialization is automatically generated based on the
+   ``constructor_args_t`` (deserialization) and the reflected attributes
+   (serialization, and deserialization if no `constructor_args_t`` exist).
+   The default behavior can be overwritten by adding the following two methods
+   in the bsdf model class:
+
+   .. code-block:: c++
+
+      inline std::string toString(void) const;
+      static inline auto fromString(const std::string& str);
+   
 Next, we add the four required ``bsdfmodel`` methods:
 
 .. code-block:: c++
@@ -263,11 +276,17 @@ Finally, we add two more macro calls to complete the implementation:
 
    #endif /* _BBM_LAMBERTIAN_H_ */
 
-   BBM_EXPORT_BSDFMODEL(bbm::lambertian);
+   BBM_EXPORT_BSDFMODEL(bbm::lambertian)
 
 The latter macro call (``BBM_EXPORT_BSDFMODEL``) informs BBM about the
 existence of the bsdfmodel ``bbm::lambertian``.  This information can be used
-to create any type of exporter (currently used for creating python bindings).
+to create any type of exporter (currently used for creating python bindings
+and ``bbm::fromString<bsdf_ptr<Config>>``).
+
+.. note::
+
+   The macro call to ``BBM_EXPORT_BSDFMODEL`` should **not** be followed by a
+   semi-colon.
 
 The former macro (``BBM_CHECK_CONCEPT``) is to aid the programmer in ensuring
 that a struct/class meets a concepts during compilation.  In this case, it

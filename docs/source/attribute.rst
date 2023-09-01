@@ -13,7 +13,8 @@ information.  BBM uses attributes in two ways:
 2. to attach default value, bounds, and type to an BSDF parameter, implemented
    through ``bbm::bsdf_parameter``.
 
-``bbm::attribute`` is implemented in ``include/core/attribute.h`` and meets
+``bbm::attribute`` is implemented in `core/attribute.h
+<../doxygen/html/core_2attribute_8h_source.html>`_ and meets
 ``bbm::concepts::attribute``:
 
 .. doxygenconcept:: bbm::concepts::attribute
@@ -66,3 +67,29 @@ In the case of ''bar'' the attribute scalar is automatically cast to an
 type what type to cast ``scalar`` to; ``C++`` lacks the ability to examine
 the intersection of types that meet the constraints and types ``scalar`` can
 be cast to.
+
+bbm::value
+----------
+
+In certain cases automatic casting of attributes to their underlying type does
+not work in the following case:
+
+.. code-block:: c++
+
+   template<typename T> requires std::is_integral<T>
+     void foo(const T& t);
+
+Even if the underlying type is integral, C++ does not know that it should
+first cast the attribute to its type.  To alleviate this, BBM includes
+(defined in `util/attribute_value.h
+<../doxygen/html/attribute__value_8h_source.html>`_:
+
+.. doxygenfunction:: bbm::value
+
+This method will cast the attribute to its value type (or leave it unaltered
+if not an attribute).  Similarly, sometimes the type of the underlying type is
+needed, but it is not always the case that the type is an attribute:
+
+.. doxygentypedef:: bbm::attribute_value_t
+
+will either return the type of ``T`` or, if T is an attribute, ``typename T::type``.

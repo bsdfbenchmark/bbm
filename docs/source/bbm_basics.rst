@@ -41,7 +41,7 @@ possible to create your own configuration. BBM relies on ``C++ concepts`` for
 setting specification requirements.  A config is a structure that must meet
 the following requirements:
 
-.. doxygenconcept:: bbm::concepts::config_struct
+.. doxygenconcept:: bbm::concepts::config
 
 The macro ``BBM_IMPORT_CONFIG( <config name> )`` will take the information
 from the config, and makes the following aliases active in the current scope:
@@ -89,9 +89,6 @@ from the config, and makes the following aliases active in the current scope:
   .. doxygenstruct:: bbm::vec3dpair
      :members:
                      
-* ``BsdfPtr``: pointer type to a bsdf.
-
-
 .. note::
 
    ``BBM_IMPORT_CONFIG`` is recursive. Any type that itself has a bbm-config
@@ -133,7 +130,12 @@ An example of using ``BBM_IMPORT_CONFIG``:
 
 The above example, defines a struct ``Foo`` that takes a config as template
 parameter ``CONF``.  Here we use ``concepts::config<CONF>`` to check that
-``CONF`` is indeed a valid config.
+``CONF`` is indeed a valid config. The concept ``concepts::has_config<T>`` can
+be used to check if a class has an imported configuration.
+
+.. note::
+
+   All concepts in bbm are organized in the ``bbm::concepts`` namespace.
 
 After ``BBM_IMPORT_CONFIG`` we can use any of the aliases.  For example, in
 the main body we declare a variable ``Vec2d v``, and a instance of
@@ -143,13 +145,8 @@ point we decide to change the configuration, we only need to change the
 
 .. note::
 
-   All concepts in bbm are organized in the ``bbm::concepts`` namespace.
-
-
-.. note::
-
    ``utils/typestring.h`` contains two useful tools for debugging.
-   ``toString`` is a macro that takes first extract the type of the argument,
+   ``toTypestring`` is a macro that takes first extract the type of the argument,
    and then calls the const-expression ``bbm::typestring<...>`` to convert the
    type to a human-readable ``std::string_view``.
 

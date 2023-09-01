@@ -1,7 +1,7 @@
 Named Arguments
 ===============
 
-In order to support automated exporting to Python, BMM needed a way to encode
+In order to support automated exporting to Python, BMM needs a way to encode
 the function argument list of a constructor.  This idea further expanded to
 also relax the rigid way arguments are passed in ``C++``.
 
