@@ -55,7 +55,7 @@ namespace bbm {
              concepts::bsdfmodel<REFERENCE>
     struct nganL2 : public sampledlossfunction<BSDF, REFERENCE, nganL2_error<get_config<BSDF>>, spherical_linearizer<get_config<BSDF>>, COMPONENT, UNIT>
   {
-    BBM_IMPORT_CONFIG( get_config<BSDF> );
+    BBM_IMPORT_CONFIG( BSDF );
 
     /********************************************************************/
     /*! \brief Constructor
@@ -126,7 +126,7 @@ namespace bbm {
              concepts::bsdfmodel<REFERENCE>
     struct lowL2 : public sampledlossfunction<BSDF, REFERENCE, lowL2_error<get_config<BSDF>>, spherical_linearizer<get_config<BSDF>>, COMPONENT, UNIT>
   {
-    BBM_IMPORT_CONFIG( get_config<BSDF> );
+    BBM_IMPORT_CONFIG( BSDF );
 
     /********************************************************************/
     /*! \brief Constructor
@@ -197,7 +197,7 @@ namespace bbm {
              concepts::bsdfmodel<REFERENCE>
     struct bieronL2 : public sampledlossfunction<BSDF, REFERENCE, bieronL2_error<get_config<BSDF>>, spherical_linearizer<get_config<BSDF>>, COMPONENT, UNIT>
   {
-    BBM_IMPORT_CONFIG( get_config<BSDF> );
+    BBM_IMPORT_CONFIG( BSDF );
 
     /********************************************************************/
     /*! \brief Constructor

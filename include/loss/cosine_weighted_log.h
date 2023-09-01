@@ -64,7 +64,7 @@ namespace bbm {
              concepts::bsdfmodel<REFERENCE>
     struct lowLog : public sampledlossfunction<BSDF, REFERENCE, lowLog_error<get_config<BSDF>>, spherical_linearizer<get_config<BSDF>>, COMPONENT, UNIT>
   {
-    BBM_IMPORT_CONFIG( get_config<BSDF> );
+    BBM_IMPORT_CONFIG( BSDF );
 
     /********************************************************************/
     /*! \brief Constructor
@@ -133,7 +133,7 @@ namespace bbm {
              concepts::bsdfmodel<REFERENCE>
     struct bieronLog : public sampledlossfunction<BSDF, REFERENCE, bieronLog_error<get_config<BSDF>>, spherical_linearizer<get_config<BSDF>>, COMPONENT, UNIT>
   {
-    BBM_IMPORT_CONFIG( get_config<BSDF> );
+    BBM_IMPORT_CONFIG( BSDF );
 
     /********************************************************************/
     /*! \brief Constructor
@@ -202,7 +202,7 @@ namespace bbm {
              concepts::bsdfmodel<REFERENCE>
     struct standardLog : public sampledlossfunction<BSDF, REFERENCE, standardLog_error<get_config<BSDF>>, spherical_linearizer<get_config<BSDF>>, COMPONENT, UNIT>
   {
-    BBM_IMPORT_CONFIG( get_config<BSDF> );
+    BBM_IMPORT_CONFIG( BSDF );
 
     /********************************************************************/
     /*! \brief Constructor
