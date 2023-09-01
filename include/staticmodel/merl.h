@@ -35,8 +35,8 @@ namespace bbm
 
     Sample, pdf, and reflectance are implemented by placeholders.
   **********************************************************************/
-  template<typename CONF, string_literal NAME="MerlData">
-  class merl_data
+  template<typename CONF, string_literal NAME="MerlData"> requires concepts::config<CONF>
+    class merl_data
   {
   public:
     BBM_IMPORT_CONFIG( CONF );
@@ -156,13 +156,13 @@ namespace bbm
     }
 
     /********************************************************************/
-    /*! \brief Custom toString
+    /*! \brief Custom string conversion
      ********************************************************************/
     inline std::string toString(void) const
     {
-      return "(\"" + bbm::toString(_filename) + "\")";
+      return std::string(name) + "(" + bbm::toString(_filename) + ")";
     }
-    
+
   private:
     /********************************************************************/
     /*! \brief Import MERL data from file
@@ -221,8 +221,8 @@ namespace bbm
   /*! \brief Data-driven MERL BSDF model with data-driven backscatter based
       importance sampling
    **********************************************************************/
-  template<typename Config>
-     using merl = ndf_sampler<merl_data<Config>, 90, 1, "Merl">;
+  template<typename Config> requires concepts::config<Config>
+    using merl = ndf_sampler<merl_data<Config, "Merl">, 90, 1>;
 
   BBM_CHECK_CONCEPT(concepts::bsdfmodel, merl<config>);
   
@@ -230,5 +230,5 @@ namespace bbm
 
 #endif /* _BBM_MERL_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::merl);
+BBM_EXPORT_BSDFMODEL(bbm::merl)
 
