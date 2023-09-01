@@ -186,7 +186,7 @@ namespace bbm {
         Value theta = spherical::theta(v);
         
         // Eval
-        Spectrum g = bbm::select((theta > theta0), Scalar(1.0) + lambda*(Scalar(1.0) - bbm::exp(c*bbm::pow(theta-theta0, k))), 1.0);
+        Spectrum g = bbm::select((theta > theta0), Scalar(1.0) + Lambda*(Scalar(1.0) - bbm::exp(c*bbm::pow(theta-theta0, k))), 1.0);
 
         // Done.
         return bbm::select(mask, g, 0);
@@ -196,12 +196,12 @@ namespace bbm {
       //! @{ \name Class Attributes
       ///////////////////////////////
       bsdf_parameter<Spectrum, bsdf_attr::Dependent, 7.5> K;
-      bsdf_parameter<Spectrum, bsdf_attr::Dependent> lambda;
+      bsdf_parameter<Spectrum, bsdf_attr::Dependent> Lambda;
       bsdf_parameter<Spectrum, bsdf_attr::Dependent> c;
       bsdf_parameter<Spectrum, bsdf_attr::Dependent> k;
       bsdf_parameter<Spectrum, bsdf_attr::Dependent, constants<Scalar>::Pi(0.5)> theta0;
       
-      BBM_ATTRIBUTES( K, lambda, c, theta0, k );
+      BBM_ATTRIBUTES( K, Lambda, c, theta0, k );
       //! @}
 
       //! \brief Default Constructor
