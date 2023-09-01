@@ -2,6 +2,7 @@
 #define _BBM_FLAGS_H_
 
 #include <type_traits>
+#include "util/reflection.h"
 
 /***********************************************************************/
 /*! \file flags.h
@@ -107,6 +108,18 @@ namespace bbm {
 
   //! @}
 
+  /**********************************************************************/
+  /*! \brief ostream output uses toString conversion
+    *********************************************************************/
+  template<typename ENUM> requires concepts::reflection::enumerate<ENUM>
+    std::ostream& operator<<(std::ostream& s, ENUM e)
+  {
+    s << bbm::toString(e);
+    return s;
+  }
+  
 } // end bbm namespace
+
+
 
 #endif /* _BBM_FLAGS_H_ */

@@ -14,6 +14,7 @@
 
   + class attributes (types and run-time values)
   + base classes
+  + enum
 
   To do:
   + member functions
@@ -114,6 +115,20 @@
   foo3 f3(3,1,'a');
   std::cout << attributes(f3) << std::endl;   // (foo::bar = 13, foo::var = 'b', bar2 = 3, bar = 1, var = 'a')
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  BBM also support reflection for enum struct/classes.
+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+  enum struct foo { A, B, C };
+  BBM_ENUM(foo, A, B, C);
+
+  std::cout << bbm::get<"B">(enum_v<foo>) << std::endl;     // 1
+  std::cout << bbm::get<1>(enum_v<foo>) << std::endl;       // 1
+  std::cout << enum_v<foo>[1] << std::endl;                 // 1
+  std::cout << enum_v<foo>.template name<1> << std::endl;   // "B"
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  See concepts/reflection.h for reflection related concepts.
   
 *************************************************************************/
 
@@ -309,7 +324,26 @@ namespace bbm {
     template<typename C>
       static constexpr size_t basetypes_size = std::tuple_size< basetypes_t<C> >::value;
     //! @}
-    
+
+
+    /********************************************************************/
+    /*! \brief BBM_ENUM macro for declaring the types of an enum
+     ********************************************************************/
+#define BBM_ENUM(FlagName, ...)                                          \
+    template<> struct bbm::reflection::bbm_enum<FlagName>                \
+    {                                                                    \
+      static constexpr auto values(void)                                 \
+      {                                                                  \
+        using enum FlagName;                                             \
+        return bbm::make_named<BBM_STRINGIFY_EACH(__VA_ARGS__)>( std::array{ __VA_ARGS__ } ); \
+      }                                                                  \
+    };                                                                   \
+
+    /********************************************************************/
+    /*! \brief Querry the names and values of an enum
+     ********************************************************************/
+    template<typename T> static constexpr auto enum_v = bbm_enum<std::decay_t<T>>::values();
+
   } // end reflection namespace
 } // end bbm namespace
 

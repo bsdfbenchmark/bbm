@@ -2,7 +2,7 @@
 #define _BBM_APPLY_ALL_H_
 
 #include "concepts/util.h"
-#include "core/attribute.h"
+#include "util/attribute_value.h"
 #include "util/type_traits.h"
 #include "util/reflection.h"
 #include "util/named.h"

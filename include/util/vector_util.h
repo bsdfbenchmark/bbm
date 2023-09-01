@@ -5,6 +5,8 @@
 #include <ostream>
 #include <type_traits>
 
+#include "concepts/stringconvert.h"
+
 #include "util/reference.h"
 #include "util/type_traits.h"
 #include "util/iterator_util.h"
@@ -42,6 +44,10 @@ namespace bbm {
     using base_type::operator=;
     using base_type::operator[];
 
+    //! \brief Std vector Casting Constructor
+    template<typename... D>
+      vector(const std::vector<D...>& v) : base_type(v) {}
+    
     //! \brief Casting Constructor
     template<typename U> requires concepts::assignable_to<U, T>
       vector(const bbm::vector<U>& src)
@@ -273,19 +279,10 @@ namespace bbm {
   //! @}
   
 
-  /////////////////////
-  // ostream support //
-  /////////////////////
   template<typename T>
     std::ostream& operator<<(std::ostream& s, const std::vector<T>& vec)
   {
-    s << "(";
-    for(auto itr=vec.begin(); itr != vec.end(); ++itr)
-    {
-      s << *itr;
-      if (itr != std::prev(vec.end())) s << ", ";
-    }
-    s << ")";
+    s << bbm::toString(vec);
     return s;
   }
 

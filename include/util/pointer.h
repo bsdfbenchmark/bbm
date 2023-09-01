@@ -2,6 +2,7 @@
 #define _BBM_POINTER_H_
 
 #include <ostream>
+#include <memory>
 #include "util/typestring.h"
 
 /************************************************************************/

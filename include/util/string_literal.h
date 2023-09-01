@@ -56,6 +56,26 @@ namespace bbm {
       return (lit == string_literal<M>(str));
     }
     //! @}
+
+    //! @{ \name less operator (constexpr)
+    template<size_t M>
+      inline constexpr bool operator<(string_literal<M> str) const
+    {
+      return std::lexicographical_compare(begin(), end(), str.begin(), str.end());
+    }
+
+    template<size_t M>
+      inline constexpr bool operator<(const char (&str)[M]) const
+    {
+      return operator<(string_literal<M>(str));
+    }
+
+    template<size_t M>
+      friend inline constexpr bool operator<(const char (&str)[M], string_literal<N> lit)
+    {
+      return (lit < string_literal<M>(str));
+    }
+    //! @}
     
     //! @{ \name concat two literals (constexpr)
     template<size_t M>
@@ -92,7 +112,7 @@ namespace bbm {
 
     //! \brief cast to C string
     inline constexpr operator const char*(void) const { return value; }
-    
+
     //! \brief forward 'value' to stream
     friend std::ostream& operator<<(std::ostream& s, const string_literal<N>& str)
     {

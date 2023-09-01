@@ -5,7 +5,6 @@
 #include <ostream>
 
 #include "util/constfor.h"
-#include "util/toString.h"
 #include "util/type_traits.h"
 
 /************************************************************************/
@@ -15,7 +14,9 @@
 
 namespace bbm {
 
- /*********************************************************************/
+  /*********************************************************************/
+  /*! \brief Create a tuple from any other type that supports std::get
+   *********************************************************************/
   template<typename T> requires concepts::gettable<T>
   inline auto to_tuple(T&& t)
   {
@@ -27,6 +28,9 @@ namespace bbm {
     return convert(std::make_index_sequence<std::tuple_size_v<std::decay_t<T>>>{});
   }
 
+  /**********************************************************************/
+  /*! \brief type of converting a type that supports std::get to a tuple
+   **********************************************************************/
   template<typename T> requires concepts::gettable<T>
     using to_tuple_t = decltype( to_tuple(std::declval<T>()) ); 
   
@@ -75,6 +79,39 @@ namespace bbm {
   ***********************************************************************/
   template<typename... Ts>
     using tuple_cat_t = decltype( std::tuple_cat( std::declval<Ts>()... ) );
+
+
+  /**********************************************************************/
+  /*! \brief subtuple
+
+    \tparam START = start index of elements to include in the new tuple
+    \tparam COUNT  = number of elements to include
+  ***********************************************************************/
+  template<size_t START, size_t COUNT, typename TUP> requires is_tuple_v<TUP> && ((START+COUNT) <= std::tuple_size_v<std::decay_t<TUP>>)
+    inline constexpr auto subtuple(TUP&& tup)
+  {
+    // if zero length => return empty
+    if constexpr (COUNT == 0) return std::tuple<>{};
+
+    // select subset
+    else
+    {
+      // helper lambda to extract the elements
+      auto extract = [&]<size_t... IDX>(std::index_sequence<IDX...>)
+      {
+        return std::tuple<std::tuple_element_t<START+IDX, std::decay_t<TUP>>...>(std::get<START+IDX>(std::forward<TUP>(tup))...);
+      };
+
+      return extract(std::make_index_sequence<COUNT>{});
+    }
+  }
+
+  /**********************************************************************/
+  /*! \brief subtuple type
+   **********************************************************************/
+  template<size_t START, size_t COUNT, typename TUP> requires is_tuple_v<TUP> && ((START+COUNT) <= std::tuple_size_v<std::decay_t<TUP>>)
+    using subtuple_t = decltype( subtuple<START,COUNT>(std::declval<TUP>()) );
+  
   
   /**********************************************************************/
   /*! \brief Recursively flatten a tuple
@@ -147,7 +184,8 @@ namespace bbm {
   //! \brief tuple_remove_const type
   template<typename T>
     using tuple_remove_const_t = decltype( tuple_remove_const( std::declval<std::decay_t<T>>() ) );
-  
+
+
 } // end bbm namespace
 
 
@@ -171,7 +209,7 @@ namespace std {
       if constexpr (bbm::is_string_type_v< std::tuple_element_t<idx, std::tuple<Ts...>> >) s << std::string("\"") + std::get<idx>(tup) + std::string("\"");
 
       // otherwise, just print value
-      else s << bbm::toString(std::get<idx>(tup));
+      else s << std::get<idx>(tup);
     });
     s << ")";
 
