@@ -18,9 +18,9 @@ as concepts. It has been tested on recent versions of ``GCC`` and
 ``Clang``. BBM uses ``cmake`` for makefile generation and ``sphinx+doxygen``
 for documentation generation.
   
-BBM is still under development. BBM currently (version 0.5.0, July 2023) supports:
+BBM is still under development. BBM currently (version 0.5.1, August 2023) supports:
 
-* 32 BSDF and variants reference implementations (evaluation and importance sampling)
+* 34 BSDF and variants reference implementations (evaluation and importance sampling)
 * support for reading the MIT-MERL measured BSDFs
 * python bindings for BSDF models
 * a plugin for Mitsuba 1 (RGB and homogeneous BSDFs only)
@@ -67,6 +67,7 @@ Foundation grant: CNS-1823154.
    :hidden:
 
    source/use_bsdf
+   source/serialization
    source/new_bsdfmodel
    source/new_microfacet
    source/precompute
@@ -85,6 +86,7 @@ Foundation grant: CNS-1823154.
    :hidden:
 
    source/internals
+   source/stringconvert
    source/attribute
    source/args
    source/reflection
