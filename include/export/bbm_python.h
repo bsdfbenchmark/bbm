@@ -2,13 +2,6 @@
 /*! \file bbm_python.h
     \brief Python support for BBM
 
-    When exporting to python, add __outside__ the include guards at
-    the end of the bsdf model's header file:
-
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
-    BBM_EXPORT_BSDFMODEL( bbm::bsdfmodelclass )
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     \param bbm::bsdfmodelclass = the class name of the BSDF model. 
 
     Assumes that:
