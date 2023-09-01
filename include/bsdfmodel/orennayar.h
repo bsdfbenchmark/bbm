@@ -154,4 +154,4 @@ namespace bbm {
   
 #endif /* BBM_ORENNAYAR_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::orennayar);
+BBM_EXPORT_BSDFMODEL(bbm::orennayar)

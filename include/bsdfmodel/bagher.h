@@ -41,12 +41,12 @@ namespace bbm {
       BBM_IMPORT_CONFIG( CONF );
 
       //! \brief uses specialized bagher_reflectance
-      using parameter_type = ior::bagher_reflectance<Value>;
+      using parameter_type = ior::bagher_reflectance<Spectrum>;
 
       //! \brief Evaluate Bagher's modified Schlick Fresnel
-      static constexpr Value eval(const parameter_type& F, const Value& cosTheta, Mask mask=true)
+      static constexpr Spectrum eval(const parameter_type& F, const Value& cosTheta, Mask mask=true)
       {
-        return bbm::select(mask, fresnel::schlick<Config>::eval(ior::reflectance<Value>(F[0]), cosTheta, mask) - (F[1] * cosTheta), 0);
+        return bbm::select(mask, fresnel::schlick<Config,ior::reflectance<Spectrum>>::eval(F[0], cosTheta, mask) - (F[1] * cosTheta), 0);
       }
     };
 
@@ -73,4 +73,4 @@ namespace bbm {
 
 #endif /* _BBM_BAGHER_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::bagher);
+BBM_EXPORT_BSDFMODEL(bbm::bagher)

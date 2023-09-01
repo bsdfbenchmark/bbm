@@ -4,6 +4,10 @@
 #include "bsdfmodel/microfacet.h"
 #include "ndf/epd.h"
 #include "maskingshadowing/vanginneken.h"
+#include "util/multirange_for.h"
+
+#include "precomputed/holzschuchpacanowski/normalization.h"
+#include "precomputed/holzschuchpacanowski/convolution.h"
 
 /************************************************************************/
 /*! \file holzschuchpacanowski.h
@@ -14,8 +18,6 @@
 
   The following models are included:
   + epd: a microfacet BSDF based on the exponential power distribution
-
-  Not (yet) included:
   + holzschuchpacanowski: the full two-scale model (specular+difraction)
   + ... diffuse variants.... TODO
 
@@ -43,4 +45,4 @@ namespace bbm {
 
 #endif /* _BBM_HOLZSCHUCHPACANOWSKI_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::epd);
+BBM_EXPORT_BSDFMODEL(bbm::epd)

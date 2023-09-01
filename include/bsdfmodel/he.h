@@ -500,6 +500,6 @@ namespace bbm {
 
 #endif /* _BBM_HE_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::he);
-BBM_EXPORT_BSDFMODEL(bbm::hewestin);
-BBM_EXPORT_BSDFMODEL(bbm::heholzschuch);
+BBM_EXPORT_BSDFMODEL(bbm::he)
+BBM_EXPORT_BSDFMODEL(bbm::hewestin)
+BBM_EXPORT_BSDFMODEL(bbm::heholzschuch)

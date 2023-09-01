@@ -39,5 +39,5 @@ namespace bbm {
 
 #endif /* _BBM_COOKTORRANCE_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::cooktorrance);
+BBM_EXPORT_BSDFMODEL(bbm::cooktorrance)
 

@@ -155,7 +155,7 @@ namespace bbm {
       achieved with a simple alias.
   ***********************************************************************/
   template<typename CONF, string_literal NAME="NganAshikhminShirley"> requires concepts::config<CONF>
-    using nganashikhminshirley = scaledmodel<ashikhminshirley<CONF, Value_t<CONF>, symmetry_v::Isotropic, NAME>, bsdf_attr::SpecularScale>;
+    using nganashikhminshirley = scaledmodel<ashikhminshirley<CONF, fresnel::schlick<CONF, ior::reflectance<Value_t<CONF>>>, symmetry_v::Isotropic, NAME>, bsdf_attr::SpecularScale>;
 
   BBM_CHECK_CONCEPT(concepts::bsdfmodel, nganashikhminshirley<config>);
 
@@ -163,7 +163,7 @@ namespace bbm {
   /*! \brief Ngan's He et al.'s BSDF likely uses the Westin et al. formulation
       but with non-complex eta.
     *********************************************************************/
-  template<typename CONF>
+  template<typename CONF> requires concepts::config<CONF>
     using nganhe = scaledmodel<ndf_sampler<he_base<CONF, fresnel::cook<CONF>, he_eq25::Errata, he_eq78::Westin, 4, 64, true, 18>, 90, 1, "NganHe">, bsdf_attr::SpecularScale>;
 
   BBM_CHECK_CONCEPT(concepts::bsdfmodel, nganhe<config>);
@@ -173,11 +173,11 @@ namespace bbm {
 #endif /* _BBM_NGAN_H_ */
 
 
-BBM_EXPORT_BSDFMODEL(bbm::nganward);
-BBM_EXPORT_BSDFMODEL(bbm::nganwardduer);
-BBM_EXPORT_BSDFMODEL(bbm::nganblinnphong);
-BBM_EXPORT_BSDFMODEL(bbm::nganlafortune);
-BBM_EXPORT_BSDFMODEL(bbm::ngancooktorrance);
-BBM_EXPORT_BSDFMODEL(bbm::nganashikhminshirley);
-BBM_EXPORT_BSDFMODEL(bbm::nganhe);
+BBM_EXPORT_BSDFMODEL(bbm::nganward)
+BBM_EXPORT_BSDFMODEL(bbm::nganwardduer)
+BBM_EXPORT_BSDFMODEL(bbm::nganblinnphong)
+BBM_EXPORT_BSDFMODEL(bbm::nganlafortune)
+BBM_EXPORT_BSDFMODEL(bbm::ngancooktorrance)
+BBM_EXPORT_BSDFMODEL(bbm::nganashikhminshirley)
+BBM_EXPORT_BSDFMODEL(bbm::nganhe)
 

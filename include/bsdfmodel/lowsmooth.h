@@ -199,4 +199,4 @@ namespace bbm {
 
 #endif /* _BBM_LOW_SMOOTH_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::lowsmooth);
+BBM_EXPORT_BSDFMODEL(bbm::lowsmooth)

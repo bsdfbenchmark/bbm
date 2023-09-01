@@ -173,4 +173,4 @@ namespace bbm {
 
 #endif /* _BBM_WARD_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::ward);
+BBM_EXPORT_BSDFMODEL(bbm::ward)

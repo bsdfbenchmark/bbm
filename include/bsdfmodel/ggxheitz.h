@@ -40,4 +40,4 @@ namespace bbm {
 
 #endif /* _BBM_GGX_HEITZ_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::ggxheitz);
+BBM_EXPORT_BSDFMODEL(bbm::ggxheitz)

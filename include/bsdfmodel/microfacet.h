@@ -204,7 +204,7 @@ namespace bbm {
     NDF ndf;
     fresnel_parameter<typename std::decay_t<Fresnel>::parameter_type> eta;
     
-    BBM_ATTRIBUTES( attributes(ndf), eta );
+    BBM_ATTRIBUTES( reflection::attributes(ndf), eta );
     //! @}
 
     //! \brief Default constructor

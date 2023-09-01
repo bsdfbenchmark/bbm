@@ -86,4 +86,4 @@ namespace bbm {
 
 #endif /* _BBM_WARD_DUER_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::wardduer);
+BBM_EXPORT_BSDFMODEL(bbm::wardduer)

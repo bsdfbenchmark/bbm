@@ -95,20 +95,10 @@ namespace bbm {
   };
 
   BBM_CHECK_CONCEPT(concepts::bsdfmodel, lowmicrofacet<config>);
-
-
-  /**********************************************************************/
-  /*! \brief Shorthand for the Low BSDF model compatible with the fits listed
-      in their supplemental material.
-  ***********************************************************************/
-  template<typename CONF, string_literal NAME="LowMicrofacetSup">
-    using lowmicrofacetsup = lowmicrofacet<CONF, microfacet_n::Cook, NAME>;
-
-  BBM_CHECK_CONCEPT(concepts::bsdfmodel, lowmicrofacetsup<config>);
   
 } // end bbm namespace
 
 #endif /* _BBM_LOW_MICROFACET_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::lowmicrofacet);
-BBM_EXPORT_BSDFMODEL(bbm::lowmicrofacetsup);
+BBM_EXPORT_BSDFMODEL(bbm::lowmicrofacet)
+

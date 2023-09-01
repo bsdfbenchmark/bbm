@@ -58,5 +58,5 @@ namespace bbm {
 
 #endif /* _BBM_RIBARDIERE_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::ribardiere);
-BBM_EXPORT_BSDFMODEL(bbm::ribardiereanisotropic);
+BBM_EXPORT_BSDFMODEL(bbm::ribardiere)
+BBM_EXPORT_BSDFMODEL(bbm::ribardiereanisotropic)

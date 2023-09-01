@@ -86,4 +86,4 @@ namespace bbm {
 
 #endif /* _BBM_WARD_DUER_GEISLER_MORODER_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::wardduergeislermoroder);
+BBM_EXPORT_BSDFMODEL(bbm::wardduergeislermoroder)

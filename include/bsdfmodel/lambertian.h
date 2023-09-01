@@ -158,6 +158,6 @@ namespace bbm {
 
 #endif /* _BBM_LAMBERTIAN_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::lambertian);
+BBM_EXPORT_BSDFMODEL(bbm::lambertian)
 
 

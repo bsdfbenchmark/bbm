@@ -38,5 +38,5 @@ namespace bbm {
 
 #endif /* _BBM_GGX_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::ggx);
+BBM_EXPORT_BSDFMODEL(bbm::ggx)
 

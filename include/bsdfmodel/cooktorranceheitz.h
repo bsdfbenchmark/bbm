@@ -44,4 +44,4 @@ namespace bbm {
 
 #endif /* _BBM_COOKTORRANCEHEITZ_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::cooktorranceheitz);
+BBM_EXPORT_BSDFMODEL(bbm::cooktorranceheitz)

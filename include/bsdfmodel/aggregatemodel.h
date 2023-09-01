@@ -3,9 +3,7 @@
 
 #include <numeric>
 
-#include "concepts/macro.h"
-#include "concepts/bsdfmodel.h"
-
+#include "bbm/bsdfmodel.h"
 #include "util/constforeach.h"
 
 /************************************************************************/
@@ -18,36 +16,37 @@ namespace bbm {
   /**********************************************************************/
   /*! \brief The sum of different BSDF models.
 
+    \tparam NAME = model name 
     \tparam MODELS = list of BSDF models over which this model aggregates
   ***********************************************************************/
-  template<typename... MODELS> requires (sizeof...(MODELS) >= 2) && concepts::matching_config<MODELS...> && (concepts::bsdfmodel<MODELS> && ...)
-    struct aggregatemodel : public MODELS...
+  template<string_literal NAME, typename... MODELS> requires (sizeof...(MODELS) >= 2) && concepts::matching_config<MODELS...> && (concepts::bsdfmodel<MODELS> && ...)
+    struct aggregatemodel_base : public MODELS...
   {
     BBM_BASETYPES(MODELS...);
     BBM_IMPORT_CONFIG( std::tuple_element_t<0, std::tuple<MODELS...>> );
-    static constexpr string_literal name = "AggregateModel";
+    static constexpr string_literal name = NAME;
     BBM_BSDF_FORWARD;
     
     //! \brief Default constructor
-    aggregatemodel(void) : MODELS()... {}
+    aggregatemodel_base(void) : MODELS()... {}
     
     //! \brief Construction from each model
-    aggregatemodel(const MODELS&... models) : MODELS(models)... {}
+    aggregatemodel_base(const MODELS&... models) : MODELS(models)... {}
     
     //! \brief Copy constructor
-    aggregatemodel(const aggregatemodel<MODELS...>& src) : MODELS( static_cast<MODELS>(src) )... {}
+    aggregatemodel_base(const aggregatemodel_base& src) : MODELS( static_cast<MODELS>(src) )... {}
     
     //! \brief Assignment operator
-    aggregatemodel<MODELS...>& operator=(const aggregatemodel<MODELS...>& src)
+    aggregatemodel_base& operator=(const aggregatemodel_base& src)
     {
       ((static_cast<MODELS&>(*this) = static_cast<MODELS>(src)), ...);
       return *this;
     }
-
-
+    
+    
     /********************************************************************/
     /*! \brief Evaluate the BSDF for a given in out direction
-
+      
       \param in = incident direction
       \param out = outgoing direction
       \param component = which reflectance component to eval
@@ -177,18 +176,51 @@ namespace bbm {
      ********************************************************************/
     inline std::string toString(void) const
     {
-      std::string str("(");
+      std::string str;
       CONSTFOREACH(MODEL, MODELS,
       {
         if(!str.empty()) str += ", ";
         str += bbm::toString( static_cast<const MODEL&>(*this) );
       });
       
-      return  str + ")";
+      return std::string(name) + "(" + str + ")";
+    }
+
+    /********************************************************************/
+    /*! \brief construct an aggregate model from a string
+     ********************************************************************/
+    static inline aggregatemodel_base fromString(const std::string& str)
+    {
+      auto [key, value] = bbm::string::get_keyword(str);
+
+      // check name
+      if(key != std::string(name)) throw std::invalid_argument(std::string("BBM: mismatched object name ") + key + ", expected: " + std::string(name));
+
+      // split
+      auto args = bbm::string::split_args(bbm::string::remove_brackets(value));
+
+      // check if number of models corresponds
+      if(sizeof...(MODELS) != args.size()) throw std::invalid_argument(std::string("BBM: expected ") + std::to_string(sizeof...(MODELS)) + " models, only found " + std::to_string(args.size()) + " in: " + str);
+
+      // create models
+      auto make_aggregate = [&]<size_t... IDX>(std::index_sequence<IDX...>)
+      {
+        return aggregatemodel_base( bbm::fromString<MODELS>(args[IDX])... );
+      };
+
+      // Done.
+      return make_aggregate(std::make_index_sequence<sizeof...(MODELS)>{});
     }
   };
 
-
+  /**********************************************************************/
+  /*! \brief The sum of different BSDF models.
+    
+    \tparam MODELS = list of BSDF models over which this model aggregates
+  ***********************************************************************/
+  template<typename... MODELS>
+    using aggregatemodel = aggregatemodel_base<"Aggregate"_sl, MODELS...>;
+  
   /**********************************************************************/
   /*! \brief Method for simplifying the creation of an aggregate model
 

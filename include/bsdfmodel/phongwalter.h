@@ -38,4 +38,4 @@ namespace bbm {
 
 #endif /* _BBM_PHONG_WALTER_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::phongwalter);
+BBM_EXPORT_BSDFMODEL(bbm::phongwalter)

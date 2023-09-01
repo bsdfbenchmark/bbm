@@ -22,21 +22,20 @@ namespace bbm {
       the diffuse term on the specular fresnel reflectance.
 
       \tparam CONF = bbm configuration
-
-      \tpatam FresnelParameterValue = underlying Value type of the ior::reflectance (Default = Spectrum)
+      \tparam Fresnel = fresnel implementation (requires concepts::Fresnel); default = fresnel::schlick<Config, ior::reflectance<Spectrum>>
       \tparam Symmetry = pass symmetry_v (Default: symmetry_v::Anisotropic)
       \tparam NAME = name of the BSDF model (Default: 'AshikhminShirleyFull')
 
       Implements: concepts::bsdfmodel
   **********************************************************************/
   template<typename CONF,
-           typename FresnelParameterValue = Spectrum_t<CONF>,
+           typename Fresnel = fresnel::schlick<CONF, ior::reflectance<Spectrum_t<CONF>>>,
            symmetry_v Symmetry = symmetry_v::Anisotropic,
            string_literal NAME="AshikhminShirleyFull"
-           > requires  concepts::config<CONF>
-    struct ashikhminshirleyfull : public ashikhminshirley<CONF, FresnelParameterValue, Symmetry>
+           > requires concepts::config<CONF> && concepts::fresnel<Fresnel> && concepts::matching_config<CONF, Fresnel>
+    struct ashikhminshirleyfull : public ashikhminshirley<CONF, Fresnel, Symmetry>
   {
-    using base = ashikhminshirley<CONF, FresnelParameterValue, Symmetry>;
+    using base = ashikhminshirley<CONF, Fresnel, Symmetry>;
     BBM_BASETYPES(base);
   public:
     BBM_IMPORT_CONFIG( CONF );
@@ -182,7 +181,7 @@ namespace bbm {
     /////////////////////////
     //! @{ Class Attributes
     /////////////////////////
-    fresnel_parameter<typename base::Fresnel::parameter_type, bsdf_attr::DiffuseParameter> diffuseReflectance;
+    diffuse_scale<Spectrum> diffuseReflectance;
 
     BBM_ATTRIBUTES(diffuseReflectance);
     //! @}
@@ -198,4 +197,4 @@ namespace bbm {
 
 #endif /* _BBM_ASHIKHMIN_SHIRLEY_FULL_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::ashikhminshirleyfull);
+BBM_EXPORT_BSDFMODEL(bbm::ashikhminshirleyfull)

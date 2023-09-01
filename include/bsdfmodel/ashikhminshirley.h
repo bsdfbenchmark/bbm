@@ -20,26 +20,23 @@ namespace bbm {
 
       \tparam CONF = bbm configuration
 
-      \tpatam FresnelParameterValue = the underlying type for the fresnel parameter (default = Spectrum) 
+      \tparam Fresnel = fresnel implementation (requires concepts::Fresnel); default = fresnel::schlick<Config, ior::reflectance<Spectrum>>
       \tparam Symmetry = pass symmetry_v (Default: symmetry_v::Anisotropic)
       \tparam NAME = name of the BSDF model (Default: 'AshikhminShirley')
 
       Implements: concepts::bsdfmodel
   **********************************************************************/
   template<typename CONF,
-           typename FresnelParameterValue = Spectrum_t<CONF>,
+           typename Fresnel = fresnel::schlick<CONF, ior::reflectance<Spectrum_t<CONF>>>,
            symmetry_v Symmetry = symmetry_v::Anisotropic,
            string_literal NAME="AshikhminShirley"
-           > requires  concepts::config<CONF>
+           > requires  concepts::config<CONF> && concepts::fresnel<Fresnel> && concepts::matching_config<CONF, Fresnel>
     struct ashikhminshirley
   {
   public:
     BBM_IMPORT_CONFIG( CONF );
     static constexpr string_literal name = NAME;
     BBM_BSDF_FORWARD;
-    
-    //! \brief Fresnel type
-    using Fresnel = fresnel::schlick<Config, ior::reflectance<FresnelParameterValue>>;
     
     /********************************************************************/
     /*! \brief Evaluate the BSDF for a given in and out direction
@@ -230,4 +227,4 @@ namespace bbm {
 
 #endif /* _BBM_ASHIKHMIN_SHIRLEY_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::ashikhminshirley);
+BBM_EXPORT_BSDFMODEL(bbm::ashikhminshirley)

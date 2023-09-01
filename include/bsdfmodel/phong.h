@@ -168,4 +168,4 @@ namespace bbm {
 
 #endif /* _BBM_PHONG_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::phong);
+BBM_EXPORT_BSDFMODEL(bbm::phong)

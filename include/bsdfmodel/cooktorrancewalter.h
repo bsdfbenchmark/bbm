@@ -43,4 +43,4 @@ namespace bbm {
 
 #endif /* _BBM_COOKTORRANCEWALTER_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::cooktorrancewalter);
+BBM_EXPORT_BSDFMODEL(bbm::cooktorrancewalter)

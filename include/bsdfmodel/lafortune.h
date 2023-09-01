@@ -177,4 +177,4 @@ namespace bbm {
   
 #endif /* _BBM_LAFORTUNE_H_ */
 
-BBM_EXPORT_BSDFMODEL(bbm::lafortune);
+BBM_EXPORT_BSDFMODEL(bbm::lafortune)
