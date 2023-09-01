@@ -21,7 +21,7 @@
 #########################################################################
 cmake_minimum_required(VERSION 3.21)
 project(BBM)
-set(BBM_VERSION "0.5.0")
+set(BBM_VERSION "0.5.1")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 #########################################################################
@@ -38,6 +38,7 @@ option(BBM_EXPORTERS "Compile Exporters" OFF)
 option(BBM_PYTHON "Include BBM python interface" OFF)
 option(BBM_BINARIES "Include BBM binaries" OFF)
 option(BBM_PYTHON_LIBRARIES "Include BBM python libraries" OFF)
+option(BBM_BSDF_FORWARD "Enable BSDF Function forwarding" ON)
 
 # Load config-file if specified, otherwise try 'config.cmake'.
 if(BBM_CONFIG)
@@ -76,13 +77,37 @@ endif()
 add_library(${BBM_NAME} INTERFACE)
 
 #########################################################################
-# Pass BBM_NAME and BBM_BRDF
+# Pass BBM_NAME, BBM_BRDF, BBM_BSDF_FORWARD, BBM_BSDF_DEFAULT_IMPORTER
 #########################################################################
 target_compile_definitions(${BBM_NAME} INTERFACE BBM_VERSION=${BBM_VERSION})
 target_compile_definitions(${BBM_NAME} INTERFACE BBM_NAME=${BBM_NAME})
 
 message(STATUS "BBM_VERSION; ${BBM_VERSION}")
 message(STATUS "BBM_NAME set to: ${BBM_NAME}")
+
+if(BBM_BSDF_FORWARD)
+  target_compile_definitions(${BBM_NAME} INTERFACE BBM_BSDF_ENABLE_FORWARD)
+  message(STATUS "BBM_BSDF_FORWARD: enabled")
+else()
+  message(STATUS "BBM_BSDF_FORWARD: disabled")
+endif()
+
+if(NOT BBM_DEFAULT_BSDF_IMPORTER)
+  set(BBM_DEFAULT_BSDF_IMPORTER "string")
+endif()
+if("${BBM_DEFAULT_BSDF_IMPORTER}" STREQUAL "string")
+  target_compile_definitions(${BBM_NAME} INTERFACE BBM_STRING_BSDF_IMPORTER)
+  message(STATUS "Default BSDF importer: BBM_STRING_BSDF_IMPORTER")
+elseif("${BBM_DEFAULT_BSDF_IMPORTER}" STREQUAL "python" AND BBM_PYTHON AND BBM_EMBED_CONFIG)
+  target_compile_definitions(${BBM_NAME} INTERFACE BBM_PYTHON_BSDF_IMPORTER BBM_CONFIG=${BBM_EMBED_CONFIG})
+  message(STATUS "Default BSDF importer: BBM_PYTHON_BSDF_IMPORTER (EMBEDDED)")
+elseif("${BBM_DEFAULT_BSDF_IMPORTER}" STREQUAL "python" AND BBM_PYTHON)
+  target_compile_definitions(${BBM_NAME} INTERFACE BBM_PYTHON_BSDF_IMPORTER)
+  message(STATUS "Default BSDF importer: BBM_PYTHON_BSDF_IMPORTER")
+else()
+  target_compile_definitions(${BBM_NAME} INTERFACE BBM_STRING_BSDF_IMPORTER)
+  message(STATUS "No valid BBM_DEFAULT_BSDF_IMPORTER selected; using BBM_STRING_BSDF_IMPORTER")
+endif()
 
 # propagate BBM_NAME to parent scope.
 if(NOT PROJECT_IS_TOP_LEVEL)
@@ -173,14 +198,12 @@ message(STATUS "Autogenerating Header Files:")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
 # set directories to scan for BSDF models
-set(BBM_MODULE_DIRS "bsdfmodel" "staticmodel")  
+if(NOT BBM_BSDFMODELS)
+  set(BBM_BSDFMODELS "bsdfmodel/*h" "staticmodel/*h")
+endif()
 
-# generate header files
-foreach(MODULE_DIR ${BBM_MODULE_DIRS})
-  write_header("${BBM_SOURCE_DIR}/include" ${MODULE_DIR})
-endforeach()
-
-write_bbm_header("${BBM_SOURCE_DIR}/include" "${BBM_MODULE_DIRS}")
+# generate header
+write_bsdfmodel_header("${BBM_SOURCE_DIR}/include" "${BBM_BSDFMODELS}")
 
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
@@ -278,10 +301,6 @@ foreach(EXEC ${EXECLIST})
   target_compile_definitions(${EXECNAME} INTERFACE ${BBM_NAME})
   target_include_directories(${EXECNAME} PUBLIC ${BBM_NAME})
   target_link_libraries(${EXECNAME} PUBLIC ${BBM_NAME})
-
-  if(BBM_BSDF)
-    target_compile_definitions(${EXECNAME} PUBLIC BBM_BSDF=${BBM_BSDF})
-  endif()
 
   # make sure all precomputation have happened
   add_dependencies(${EXECNAME} precompute)

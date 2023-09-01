@@ -3,20 +3,12 @@
 #include <random>
 
 #include "bbm.h"
-#include "bbm/bsdf_ptr.h"
-#include "bbm/vec3dpair.h"
+#include "bbm/bsdf_import.h"
 #include "core/spherical.h"
 #include "util/option.h"
 #include "util/multirange_for.h"
 #include "util/gamma.h"
-
-#ifdef BBM_PYTHON
-  #include "python/bbm_python_interpreter.h"
-#elif !defined(BBM_BSDF)
-  // Change BBM_BSDF if a different BSDF is needed.
-  #define BBM_BSDF lambertian<floatRGB>()
-#endif /* BBM_PYTHON */
-
+#include "util/vector_util.h"
 
 using namespace bbm;
 BBM_IMPORT_CONFIG( floatRGB );
@@ -39,7 +31,7 @@ BsdfSample sampleSphere(const Vec2d& xi)
   spherical::theta(coord) = bbm::safe_acos(1.0 - 2.0 * xi[0]);
   spherical::phi(coord) = xi[1] * Constants::Pi(2);
 
-  return BsdfSample{ spherical::convert(coord), 1.0 / Constants::Pi(4), BsdfFlag::None };
+  return BsdfSample{ spherical::convert(coord), 1.0 / Constants::Pi(4), bsdf_flag::None };
 }
 
 //! \brief Generate point uniformly on hemisphere (pdf = 1/2pi)
@@ -49,26 +41,26 @@ BsdfSample sampleHemisphere(const Vec2d& xi)
   spherical::theta(coord) = bbm::safe_acos(xi[0]);
   spherical::phi(coord) = xi[1] * Constants::Pi(2);
 
-  return BsdfSample{ spherical::convert(coord), 1.0 / Constants::Pi(2), BsdfFlag::None };
+  return BsdfSample{ spherical::convert(coord), 1.0 / Constants::Pi(2), bsdf_flag::None };
 }
 
 
 /***********************************************************************/
 /*! \brief Compare reflectance with MC integral
 ************************************************************************/
-void testReflectance(const BsdfPtr& bsdf, const option_map& opt)
+void testReflectance(const bsdf_ptr<Config>& bsdf, const option_parser& opt)
 {
   //////////////////
   // Parse Options
   //////////////////
-  size_t samples = bbm::get<int_option>(opt, "samples", 100000);
-  size_t numtheta = bbm::get<int_option>(opt, "theta", 1);
-  bool importance = bbm::get<bool_option>(opt, "importanceSampling");
+  size_t samples = opt.get<size_t>("samples", 100000);
+  size_t numtheta = opt.get<size_t>("theta", 1);
+  bool importance = opt.get<bool>("importanceSampling", false);
 
-  auto invalid = validate_option_keywords(opt, "bsdfmodel", "test", "samples", "theta", "importanceSampling");
-  if(invalid != "")
+  auto invalid = opt.validate({"bsdfmodel", "test", "samples", "theta", "importanceSampling"});
+  if(!invalid.empty())
   {
-    std::cerr << "ERROR: invalid keyword '" << invalid << "'." << std::endl;
+    std::cout << "ERROR: invalid keywords: " << invalid << "." << std::endl;
     return;
   }
   
@@ -90,7 +82,7 @@ void testReflectance(const BsdfPtr& bsdf, const option_map& opt)
       auto sample = (importance) ? bsdf.sample(out, rndVec2d()) : sampleSphere(rndVec2d());
       
       // accumulate
-      if(sample.pdf > Constants::Epsilon())
+      if(bbm::any(sample.pdf > Constants::Epsilon()))
         estimate += bsdf.eval(sample.direction, out) * vec::z(sample.direction) / sample.pdf;
     }
     
@@ -107,17 +99,17 @@ void testReflectance(const BsdfPtr& bsdf, const option_map& opt)
 /***********************************************************************/
 /*! \brief Check reciprocity
 ************************************************************************/
-void testReciprocity(const BsdfPtr& bsdf, const option_map& opt)
+void testReciprocity(const bsdf_ptr<Config>& bsdf, const option_parser& opt)
 {
   ///////////////////
   // Parse Options
   ///////////////////
-  size_t samples = get<int_option>(opt, "samples", 1000000);
+  size_t samples = opt.get<size_t>("samples", 1000000);
 
-  auto invalid = validate_option_keywords(opt, "bsdfmodel", "test", "samples");
-  if(invalid != "")
+  auto invalid = opt.validate({"bsdfmodel", "test", "samples"});
+  if(!invalid.empty())
   {
-    std::cerr << "ERROR: invalid keyword '" << invalid << "'." << std::endl;
+    std::cout << "ERROR: invalid keywords: " << invalid << "." << std::endl;
     return;
   }
 
@@ -144,8 +136,8 @@ void testReciprocity(const BsdfPtr& bsdf, const option_map& opt)
     sum_i += diff_i;
 
     // store max difference
-    if( bbm::hsum(diff_r) > bbm::hsum(max_r) ) { maxpair_r = dir; max_r = diff_r; }
-    if( bbm::hsum(diff_i) > bbm::hsum(max_i) ) { maxpair_i = dir; max_i = diff_i; }
+    if( bbm::any(bbm::hsum(diff_r) > bbm::hsum(max_r)) ) { maxpair_r = dir; max_r = diff_r; }
+    if( bbm::any(bbm::hsum(diff_i) > bbm::hsum(max_i)) ) { maxpair_i = dir; max_i = diff_i; }
   }
 
   // normalize
@@ -162,17 +154,17 @@ void testReciprocity(const BsdfPtr& bsdf, const option_map& opt)
 /***********************************************************************/
 /*! \brief Check adjoint
 ************************************************************************/
-void testAdjoint(const BsdfPtr& bsdf, const option_map& opt)
+void testAdjoint(const bsdf_ptr<Config>& bsdf, const option_parser& opt)
 {
   ///////////////////
   // Parse Options
   ///////////////////
-  size_t samples = get<int_option>(opt, "samples", 100000);
+  size_t samples = opt.get<size_t>("samples", 100000);
 
-  auto invalid = validate_option_keywords(opt, "bsdfmodel", "test", "samples");
-  if(invalid != "")
+  auto invalid = opt.validate({"bsdfmodel", "test", "samples"});
+  if(!invalid.empty())
   {
-    std::cerr << "ERROR: invalid keyword '" << invalid << "'." << std::endl;
+    std::cout << "ERROR: invalid keywords: " << invalid << "." << std::endl;
     return;
   }
 
@@ -196,7 +188,7 @@ void testAdjoint(const BsdfPtr& bsdf, const option_map& opt)
     sum_a += diff_a;
 
     // store max difference
-    if( bbm::hsum(diff_a) > bbm::hsum(max_a) ) { maxpair_a = dir; max_a = diff_a; }
+    if( bbm::any(bbm::hsum(diff_a) > bbm::hsum(max_a)) ) { maxpair_a = dir; max_a = diff_a; }
   }
 
   // normalize
@@ -211,20 +203,20 @@ void testAdjoint(const BsdfPtr& bsdf, const option_map& opt)
 /***********************************************************************/
 /*! \brief Check PDF properties (non-negative & sample.pdf == pdf)
 ************************************************************************/
-void testPdf(const BsdfPtr& bsdf, const option_map& opt)
+void testPdf(const bsdf_ptr<Config>& bsdf, const option_parser& opt)
 {
   ///////////////////
   // Parse Options
   ///////////////////
-  size_t samples = get<int_option>(opt, "samples", 100000);
-  size_t maxError = get<int_option>(opt, "maxError", 10);
-  bool checkBelowHorizon = get<bool_option>(opt, "checkBelowHorizon");
-  bool samplesphere = get<bool_option>(opt, "sampleSphere");
+  size_t samples = opt.get<size_t>("samples", 100000);
+  size_t maxError = opt.get<size_t>("maxError", 10);
+  bool checkBelowHorizon = opt.get<bool>("checkBelowHorizon", false);
+  bool samplesphere = opt.get<bool>("sampleSphere", false);
   
-  auto invalid = validate_option_keywords(opt, "bsdfmodel", "test", "samples", "maxError", "checkBelowHorizon", "sampleSphere");
-  if(invalid != "")
+  auto invalid = opt.validate({"bsdfmodel", "test", "samples", "maxError", "checkBelowHorizon", "sampleSphere"});
+  if(!invalid.empty())
   {
-    std::cerr << "ERROR: invalid keyword '" << invalid << "'." << std::endl;
+    std::cout << "ERROR: invalid keywords: " << invalid << "." << std::endl;
     return;
   }
 
@@ -234,7 +226,7 @@ void testPdf(const BsdfPtr& bsdf, const option_map& opt)
   // warn if negative PDF, and check if sample.pdf == pdf
   size_t count_negative_r = 0, count_negative_i = 0;
   size_t count_zr = 0, count_zi = 0;
-  Scalar mismatch_r = 0, mismatch_i = 0;
+  Value mismatch_r = 0, mismatch_i = 0;
 
   for(size_t s = 0 ; s < samples && count_negative_r < maxError && count_negative_i < maxError && count_zr < maxError && count_zi < maxError; ++s)
   {
@@ -246,16 +238,16 @@ void testPdf(const BsdfPtr& bsdf, const option_map& opt)
     auto sample_i = bsdf.sample(sample.direction, rndVec2d(), bsdf_flag::All, unit_t::Importance);
 
     // below horizong?
-    if(checkBelowHorizon && vec::z(sample_r.direction) < 0) { count_zr++; std::cout << " Sampled direction " << sample_r.direction << " below horizon for " << sample.direction << std::endl; }
-    if(checkBelowHorizon && vec::z(sample_i.direction) < 0) { count_zi++; std::cout << " Sampled direction " << sample_i.direction << " below horizon for " << sample.direction << std::endl; }
+    if(checkBelowHorizon && bbm::any(vec::z(sample_r.direction) < 0)) { count_zr++; std::cout << " Sampled direction " << sample_r.direction << " below horizon for " << sample.direction << std::endl; }
+    if(checkBelowHorizon && bbm::any(vec::z(sample_i.direction) < 0)) { count_zi++; std::cout << " Sampled direction " << sample_i.direction << " below horizon for " << sample.direction << std::endl; }
     
     // eval pdf
     auto pr = bsdf.pdf(sample_r.direction, sample.direction, bsdf_flag::All, unit_t::Radiance);
     auto pi = bsdf.pdf(sample_i.direction, sample.direction, bsdf_flag::All, unit_t::Importance);
 
     // check sign
-    if(pr < 0) { count_negative_r++; std::cout << " Negative PDF (" << pr << ") for (" << sample_r.direction << ", " << sample.direction << ")" << std::endl; }
-    if(pi < 0) { count_negative_i++; std::cout << " Negative PDF (" << pi << ") for (" << sample_i.direction << ", " << sample.direction << ")" << std::endl; }
+    if(bbm::any(pr < 0)) { count_negative_r++; std::cout << " Negative PDF (" << pr << ") for (" << sample_r.direction << ", " << sample.direction << ")" << std::endl; }
+    if(bbm::any(pi < 0)) { count_negative_i++; std::cout << " Negative PDF (" << pi << ") for (" << sample_i.direction << ", " << sample.direction << ")" << std::endl; }
     
     // check mismatch
     mismatch_r += bbm::abs(sample_r.pdf - pr);
@@ -277,19 +269,19 @@ void testPdf(const BsdfPtr& bsdf, const option_map& opt)
 /***********************************************************************/
 /*! \brief Check PDF Integral == 1
 ************************************************************************/
-void testPdfInt(const BsdfPtr& bsdf, const option_map& opt)
+void testPdfInt(const bsdf_ptr<Config>& bsdf, const option_parser& opt)
 {
   ///////////////////
   // Parse Options
   ///////////////////
-  size_t samples = get<int_option>(opt, "samples", 1000000);
-  size_t trials = get<int_option>(opt, "trials", 10);
-  bool samplesphere = get<bool_option>(opt, "sampleSphere");
+  size_t samples = opt.get<size_t>("samples", 1000000);
+  size_t trials = opt.get<size_t>("trials", 10);
+  bool samplesphere = opt.get<bool>("sampleSphere", false);
 
-  auto invalid = validate_option_keywords(opt, "bsdfmodel", "test", "samples", "trials", "sampleSphere");
-  if(invalid != "")
+  auto invalid = opt.validate({"bsdfmodel", "test", "samples", "trials", "sampleSphere"});
+  if(!invalid.empty())
   {
-    std::cerr << "ERROR: invalid keyword '" << invalid << "'." << std::endl;
+    std::cout << "ERROR: invalid keywords: " << invalid << "." << std::endl;
     return;
   }
     
@@ -298,14 +290,14 @@ void testPdfInt(const BsdfPtr& bsdf, const option_map& opt)
   // generate 'trials' random directions to check the PDF integral for
   for(size_t t=0; t < trials; ++t)
   {
-    Scalar pdf_r = 0, pdf_i = 0;
+    Value pdf_r = 0, pdf_i = 0;
     auto sample_t = (samplesphere) ? sampleSphere(rndVec2d()) : sampleHemisphere(rndVec2d());
 
     for(size_t s=0; s < samples; ++s)
     {
       auto sample_s = sampleSphere(rndVec2d());
 
-      if(sample_s.pdf > Constants::Epsilon())
+      if(bbm::any(sample_s.pdf > Constants::Epsilon()))
       {
         pdf_r += bsdf.pdf(sample_s.direction, sample_t.direction, bsdf_flag::All, unit_t::Radiance) / sample_s.pdf;
         pdf_i += bsdf.pdf(sample_s.direction, sample_t.direction, bsdf_flag::All, unit_t::Importance) / sample_s.pdf;
@@ -326,23 +318,23 @@ void testPdfInt(const BsdfPtr& bsdf, const option_map& opt)
 /***********************************************************************/
 /*! \brief Check whether sampling matches pdf (White Furnace Test - ChiSquare test)
 ************************************************************************/
-void testSample(const BsdfPtr& bsdf, const option_map& opt)
+void testSample(const bsdf_ptr<Config>& bsdf, const option_parser& opt)
 {
   ///////////////////
   // Parse Options
   ///////////////////
-  size_t pdfSamples = get<int_option>(opt, "pdfSamples", 4096);
-  size_t samples = get<int_option>(opt, "samples", 100000);
-  size_t theta = get<int_option>(opt, "theta", 10);
-  size_t phi = get<int_option>(opt, "phi", 20);
-  size_t trials = get<int_option>(opt, "trials", 10);
-  bool samplesphere = get<bool_option>(opt, "sampleSphere");
-  bool includeZeroPdfSamples = get<bool_option>(opt, "includeZeroPdfSamples");
+  size_t pdfSamples = opt.get<size_t>("pdfSamples", 4096);
+  size_t samples = opt.get<size_t>("samples", 100000);
+  size_t theta = opt.get<size_t>("theta", 10);
+  size_t phi = opt.get<size_t>("phi", 20);
+  size_t trials = opt.get<size_t>("trials", 10);
+  bool samplesphere = opt.get<bool>("sampleSphere", false);
+  bool includeZeroPdfSamples = opt.get<bool>("includeZeroPdfSamples", false);
   
-  auto invalid = validate_option_keywords(opt, "bsdfmodel", "test", "pdfSamples", "samples", "theta", "phi", "trials", "sampleSphere", "includeZeroPdfSamples");
-  if(invalid != "")
+  auto invalid = opt.validate({"bsdfmodel", "test", "pdfSamples", "samples", "theta", "phi", "trials", "sampleSphere", "includeZeroPdfSamples"});
+  if(!invalid.empty())
   {
-    std::cerr << "ERROR: invalid keyword '" << invalid << "'." << std::endl;
+    std::cout << "ERROR: invalid keywords: " << invalid << "." << std::endl;
     return;
   }
 
@@ -355,8 +347,8 @@ void testSample(const BsdfPtr& bsdf, const option_map& opt)
     auto sample_t = (samplesphere) ? sampleSphere(rndVec2d()) : sampleHemisphere(rndVec2d());    
 
     // compute pdf per bin
-    std::vector<Scalar> pdf(theta * phi, 0);
-    std::vector<Scalar> count(theta * phi, 0);
+    std::vector<Value> pdf(theta * phi, 0);
+    std::vector<Value> count(theta * phi, 0);
   
     // integrate pdf for all bins
     Vec2d sph_coord;
@@ -384,11 +376,11 @@ void testSample(const BsdfPtr& bsdf, const option_map& opt)
     {
       auto sample = bsdf.sample(sample_t.direction, rndVec2d());
 
-      if(includeZeroPdfSamples || sample.pdf > Constants::Epsilon())
+      if(includeZeroPdfSamples || bbm::any(sample.pdf > Constants::Epsilon()))
       {
         sph_coord = spherical::convert(sample.direction);
-        size_t t = bbm::min( spherical::theta(sph_coord) / Constants::Pi() * theta, theta-1);
-        size_t p = bbm::min( spherical::phi(sph_coord) / Constants::Pi(2) * phi, phi-1);
+        size_t t = bbm::cast<size_t>(bbm::min( spherical::theta(sph_coord) / Constants::Pi() * theta, theta-1));
+        size_t p = bbm::cast<size_t>(bbm::min( spherical::phi(sph_coord) / Constants::Pi(2) * phi, phi-1));
         size_t idx = t * phi + p;
 
         // store
@@ -397,15 +389,14 @@ void testSample(const BsdfPtr& bsdf, const option_map& opt)
     }
 
     // compute chi-square
-    Scalar chi2 = 0, df = -1; idx=0;
+    Value chi2 = 0, df = -1; idx=0;
     for(size_t t=0; t < theta; ++t)
       for(size_t p=0; p < phi; ++p, idx++)
       {
-        Scalar m = pdf[idx] * samples;
+        Value m = pdf[idx] * samples;
         
-        if(m > Constants::Epsilon() && count[idx] > 5)
+        if(bbm::any(m > Constants::Epsilon() && count[idx] > 5))
         {
-          //std::cerr << pdf[idx] << ": " << count[idx] << " vs " << m << std::endl;
           chi2 += pow( count[idx] - m, 2) / m;
           df++;
         }
@@ -415,9 +406,9 @@ void testSample(const BsdfPtr& bsdf, const option_map& opt)
     std::cout << " Chi2 for " << sample_t.direction << " = " << chi2 << " (with " << df << " degrees of freedom)." << std::endl;
 
     // compute P value
-    if(df > 1)
+    if(bbm::any(df > 1))
       {
-      float P = bbm::gamma_q((df-1) / 2, chi2 / 2);
+      Value P = bbm::gamma_q((df-1) / 2, chi2 / 2);
       std::cout << "  P = " << P << " (reject if lower than confidence)." << std::endl;
     }
     else std::cout << " No degrees of freedom; need at least 1 to compute P." << std::endl;
@@ -448,22 +439,19 @@ int main(int argc, char** argv)
   /////////////////
   if(argc == 1)
   {
-    std::cout << "Usage: " << argv[0] << " [bsdfmodel=<python string>] [test=<test name> [test options]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " [bsdfmodel=<bsdf string>] [test=<test name> [test options]" << std::endl;
     std::cout << "  + test=reflectance [samples=100000] [theta=1] [importanceSampling]: compare the approximated reflectance method with a MC integration of the BSDF." << std::endl;
     std::cout << "  + test=reciprocity [samples=100000]: checks if the BSDF is symmetric for 'samples' random dirctions." << std::endl;
     std::cout << "  + test=adjoint [samples=100000]: checks if the adjoint BSDF is equal to the BSDF with in/out swapped." << std::endl;
     std::cout << "  + test=pdf [samples=100000] [maxError=10] [checkBelowHorizon] [sampleSphere]: checks if the PDF >= 0, and the PDF returned by the sampling method matches the pdf from the pdf-method. Abort if the number of fails exceeds 'maxError'" << std::endl;
     std::cout << "  + test=pdfInt [samples=100000] [trials=10] [sampleSphere]: checks the integral (MC with 'samples' samples) of the PDF for 'trials' different directions." << std::endl;
     std::cout << "  + test=sample [pdfSamples=4069] [samples=100000] [theta=10] [phi=20] [trials=10] [sampleSphere] [includeZeroPdfSamples]: perform Chi2 test on the sample vs the pdf method.  The domain is subdivided in [theta x phi] bins, and for each bin we integrate the PDF using MC.  A higher sampling rate might be needed for sharp BSDFs." << std::endl;
-#ifndef BBM_PYTHON
-    std::cout << "BBM compiled without Python support. <bsdfmodel> is ignored and " << BBM_STRINGIFY(BBM_BSDF) << " is used instead." << std::endl;
-#endif /* BBM_PYTHON */
     return -1;
   }
 
-  auto opt = parse_options(argc, argv);
-  auto bsdfmodel = get<string_option>(opt, "bsdfmodel");
-  auto testname = get<string_option>(opt, "test");
+  option_parser opt(argc, argv);
+  auto bsdfmodel = opt.get<std::string>("bsdfmodel");
+  auto testname = opt.get<std::string>("test");
 
   if(testname == "")
   {
@@ -475,19 +463,7 @@ int main(int argc, char** argv)
   /////////////////
   // create bsdf
   /////////////////
-  #ifdef BBM_PYTHON
-    if(bsdfmodel == "")
-    {
-      std::cout << "ERROR: bsdfmodel not specified." << std::endl;
-      return -1;
-    }
-    BsdfPtr bsdf = python::capture<BsdfPtr>(bsdfmodel);
-    std::cout << "Using BSDF: " << bsdf << std::endl;
-  #else
-    if(bsdfmodel != "")
-      std::cout << "Ignoring user specified BSDF (" << bsdfmodel << "), and using BBM_BSDF=" << BBM_STRINGIFY(BBM_BSDF) << " instead." << std::endl;
-    BsdfPtr bsdf = make_bsdf_ptr(BBM_BSDF);
-  #endif /* BBM_PYTHON */
+  auto bsdf = bsdf_import<Config>(bsdfmodel);
   
   // run test
   if(testname == "reflectance") testReflectance(bsdf, opt);

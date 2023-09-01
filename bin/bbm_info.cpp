@@ -58,23 +58,17 @@ int main(int /*argc*/, char** /*argv*/)
 
   // print all models
   std::vector<std::string> bsdflist;
+  std::vector<std::string> staticlist;
   #undef BBM_EXPORT_BSDFMODEL
-  #define BBM_EXPORT_BSDFMODEL(bsdfmodel) bsdflist.push_back( bsdfmodel<bbm::floatRGB>::name.value );
-  #include "bbm_bsdfmodel.h"
+  #define BBM_EXPORT_BSDFMODEL(bsdfmodel) (bbm::reflection::attributes_size<bsdfmodel<bbm::floatRGB>> == 0) ? staticlist.push_back( std::string(bsdfmodel<bbm::floatRGB>::name)) : bsdflist.push_back( std::string(bsdfmodel<bbm::floatRGB>::name));
+  #include "bbm_bsdfmodels.h"
   #include "export/clear_export.h"
 
   std::cerr << bsdflist.size() << " BSDF models supported:" << std::endl;
   for(auto& m : bsdflist)
     std::cerr << " + " << m << std::endl;
 
-  // print all static models
-  std::vector<std::string> staticlist;
-  #undef BBM_EXPORT_BSDFMODEL
-  #define BBM_EXPORT_BSDFMODEL(staticmodel) staticlist.push_back( staticmodel<bbm::floatRGB>::name.value );
-  #include "bbm_staticmodel.h"
-  #include "export/clear_export.h"
-
-  std::cerr << staticlist.size() << " static (measured) BSDFs supported:" << std::endl;
+  std::cerr << staticlist.size() << " Static BSDF models supported:" << std::endl;
   for(auto& m : staticlist)
     std::cerr << " + " << m << std::endl;
   

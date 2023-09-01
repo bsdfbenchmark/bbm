@@ -33,6 +33,19 @@
           }
       },
       {
+          "name": "gcc-prof",
+          "displayName": "GCC",
+          "description": "Build options for GCC compile performance profiling",
+          "generator": "Unix Makefiles",
+          "binaryDir": "${sourceDir}/build",
+          "cacheVariables": {
+              "CMAKE_C_COMPILER": "gcc",
+              "CMAKE_CXX_COMPILER": "g++",
+              "CMAKE_BUILD_TYPE": "RELEASE",
+              "CMAKE_CXX_FLAGS": "-Wno-attributes -Wfatal-errors -flto=auto -ftime-report"
+          }
+      },
+      {
           "name": "clang",
           "displayName":  "Clang",
           "description": "Default build options for Clang",
