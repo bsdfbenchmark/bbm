@@ -105,9 +105,7 @@ if(DRJIT_AUTODIFF)
 endif()
 
 if(DRJIT_PYTHON)
-  if(DRJIT_PYTHON_PACKET)
-    target_compile_definitions(${BBM_NAME} INTERFACE DRJIT_PYTHON_PACKET)
-  endif()
   target_compile_definitions(${BBM_NAME} INTERFACE DRJIT_PYTHON)
-  # TODO link to enoki python lib
+  #target_link_libraries(${BBM_NAME} INTERFACE drjit-python)
+  # TODO link to drjit python lib
 endif()

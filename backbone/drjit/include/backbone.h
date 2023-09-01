@@ -23,6 +23,8 @@
   #include "backbone/gradient.h"
 #endif /* DRJIT_AUTODIFF */
 
+#include "backbone/stringconvert.h"
+
 /************************************************************************/
 /*! \file backbone.h
 
@@ -34,11 +36,11 @@ namespace bbm {
   
   /*** Implementation detail ***/
   namespace detail {
-    template<typename VALUE, string_literal NAME>
+    template<typename VALUE, string_literal NAME, typename CONF>
       struct rgbConfig
     {
       static constexpr string_literal name = NAME;
-      using Config = rgbConfig<VALUE,NAME>;
+      using Config = CONF;
       using Value = VALUE;
       using Spectrum = backbone::color<Value>;
       static Spectrum wavelength(void) { return {0.645, 0.526, 0.444}; } // in micron
@@ -48,16 +50,16 @@ namespace bbm {
   /**********************************************************************/
   /*! @{ \name Config with non-packet/non-diff floating point RGB colors
    **********************************************************************/
-  struct floatRGB : public detail::rgbConfig<DRJIT_FLOAT, "floatRGB"> {};
-  struct doubleRGB : public detail::rgbConfig<DRJIT_DOUBLE, "doubleRGB"> {};
+  struct floatRGB : public detail::rgbConfig<DRJIT_FLOAT, "floatRGB", floatRGB> {};
+  struct doubleRGB : public detail::rgbConfig<DRJIT_DOUBLE, "doubleRGB", doubleRGB> {};
   //! @}
 
 #ifdef DRJIT_AUTODIFF
   /**********************************************************************/
   /*! @{ \name Config with differentiable floating point RGB colors
    **********************************************************************/
-  struct floatDiffRGB : public detail::rgbConfig<drjit::DiffArray<DRJIT_FLOAT>, "floatDiffArray"> {};
-  struct doubleDiffRGB : public detail::rgbConfig<drjit::DiffArray<DRJIT_DOUBLE>, "doubleDiffArray"> {};
+  struct floatDiffRGB : public detail::rgbConfig<drjit::DiffArray<DRJIT_FLOAT>, "floatDiffArray", floatDiffRGB> {};
+  struct doubleDiffRGB : public detail::rgbConfig<drjit::DiffArray<DRJIT_DOUBLE>, "doubleDiffArray", doubleDiffRGB> {};
   //! @}
 #endif /* DRJIT_AUTODIFF */
   

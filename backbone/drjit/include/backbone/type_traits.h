@@ -46,13 +46,33 @@ namespace backbone {
   #endif /* DRJIT_AUTODIFF */
     
   } // end detail namespace
+
   
+  /*** Implementation details for detecting LLVM arrays ***/
+  namespace detail {
+
+    template<typename T> struct is_LLVMArray : std::false_type {};
+    template<typename T> struct is_LLVMArray<drjit::LLVMArray<T>> : std::true_type {};
+  } // end detail namespace
+  
+  /**********************************************************************/
+  /*! \brief true if the type is an LLVMArray
+   **********************************************************************/
+  template<typename T>
+    static constexpr bool is_LLVMArray_v = detail::is_LLVMArray<std::decay_t<T>>::value;
+
+ 
   /**********************************************************************/
   /*! \brief true if type supports autodiff
     *********************************************************************/
   template<typename T> inline constexpr bool is_diff_v = std::disjunction< backbone::detail::is_diff<std::decay_t<T>>, backbone::detail::is_diff<drjit::value_t<std::decay_t<T>>>>::value;
 
+  /**********************************************************************/
+  /*! \brief true if DiffArray type
+   **********************************************************************/
+  template<typename T> inline constexpr bool is_DiffArray_v = backbone::detail::is_diff<std::decay_t<T>>::value;
 
+    
   /*** Implementation details for remove_diff_t ***/
   namespace detail {
     template<typename T> struct remove_diff { using type = T; };
@@ -117,7 +137,7 @@ namespace backbone {
   namespace detail {
     template<typename T> struct remove_packet { using type = T; };
     template<typename T> struct remove_packet<drjit::Packet<T>> { using type = T; };
-    template<typename T> struct remove_packet<drjit::Mask<T>> { using type = T; };
+    template<typename T> struct remove_packet<drjit::PacketMask<T>> { using type = T; };
     
     template<typename T> requires (drjit::is_static_array_v<T> && !is_packet<T>::value)
       struct remove_packet<T>
@@ -159,12 +179,13 @@ namespace backbone {
   namespace detail {
     template<typename T> struct is_index : std::is_convertible<T, size_t> {};
     template<> struct is_index<drjit::Packet<size_t>> : std::true_type {};
-      
+    template<> struct is_index<drjit::LLVMArray<size_t>> : std::true_type {};
+    
     template<typename T>
       struct index_impl
     {
-      using type = size_t;
-      using mask = bool; 
+      using type = std::conditional_t<is_LLVMArray_v<T>, drjit::LLVMArray<size_t>, size_t>;
+      using mask = std::conditional_t<is_LLVMArray_v<T>, drjit::LLVMArray<bool>, bool>; 
     };
 
     template<typename T> requires is_packet_v<T>
@@ -192,7 +213,8 @@ namespace backbone {
    ********************************************************************/
   template<typename T>
     using index_mask_t = typename detail::index_impl<std::decay_t<T>>::mask;
-  
+
+
 } // end backbone namespace
 
 #endif /* _BBM_DRJIT_TYPE_TRAITS_H_ */
