@@ -3,12 +3,17 @@
 #include <mitsuba/hw/basicshader.h>
 #include <mitsuba/core/warp.h>
 
+// check if BBM is properly setup
+#ifndef BBM_CONFIG
+  #define BBM_CONFIG floatRGB
+#endif
+
 // Undef the mitsuba Epsilon macro; clashes with bbm::constant<T>::Epsilon()
 #undef Epsilon  
 
 // BBM Includes
 #include "bbm.h"
-#include "python/bbm_embed_module.h"
+#include "bbm/bsdf_import.h"
 
 MTS_NAMESPACE_BEGIN
 
@@ -17,22 +22,23 @@ MTS_NAMESPACE_BEGIN
     \brief Allow to use BBM bsdfs in Mitsuba 0.6.0
 
     This file must be compiled as a Mitsuba plugin.  This plugin uses the bbm
-    python interface to specify a BSDF.  While this causes some overhead,
+    bsdf string format to specify a BSDF.  While this causes some overhead,
     mainly an extra 'vritual' function call when evaluating the BSDF, it
     alleviates the plugin from managing the different BSDF
     model. Alternatively, one could create a plugin per BBM bsdf model, at the
     cost of creating many plugins.
 
-    This file also assumes BBM_NAME and BBM_CONFIG have been set correctly.
-
-    This plugin embeds the python library, and thus does not require the 
-    dynamic library of the bbm python module.  
+    Assumes BBM_CONFIG is set.
+    
+    Note: this plug-in will use embedded python when the bsdf_import method
+    uses python as the interpreter to avoid locating and reading in the python
+    lib.
 
     Usage:
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.xml}
     <bsdf type="mitsuba_bbm">
-      <string name="bsdf" value="<python definition>"/>
+      <string name="bsdf" value="<bsdf string>"/>
     </bsdf>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -63,15 +69,15 @@ class BBMbsdf : public BSDF
 public:
   BBMbsdf(const Properties &props) : BSDF(props)
   { 
-    bbm_python_str = props.getString("bsdf", "Lambertian()");
+    bbm_str = props.getString("bsdf", "Lambertian()");
 
     // Notify which BSDF is created
-    SLog(EInfo, "Using BBM bsdf: \"%s\"", bbm_python_str.c_str());
+    SLog(EInfo, "Using BBM bsdf: \"%s\"", bbm_str.c_str());
   }
 
   BBMbsdf(Stream *stream, InstanceManager *manager) : BSDF(stream, manager)
   {
-    bbm_python_str = stream->readString();
+    bbm_str = stream->readString();
     
     // configure
     configure();
@@ -86,7 +92,7 @@ public:
     m_usesRayDifferentials = false;
 
     // create BSDF
-    bbm_bsdf_ptr = bbm::embed::capture<bbm::BsdfPtr_t<bbm::embed::config>>(bbm_python_str);
+    bbm_bsdf_ptr = bbm::bsdf_import<bbm::BBM_CONFIG>(bbm_str);
 
     // Configure
     BSDF::configure();
@@ -111,12 +117,12 @@ public:
 
     /* eval BSDF */
     Spectrum result(0.0f);
-    bbm::Vec3d_t<bbm::embed::config> in(bRec.wo.x, bRec.wo.y, bRec.wo.z);
-    bbm::Vec3d_t<bbm::embed::config> out(bRec.wi.x, bRec.wi.y, bRec.wi.z);
+    bbm::Vec3d_t<bbm::BBM_CONFIG> in(bRec.wo.x, bRec.wo.y, bRec.wo.z);
+    bbm::Vec3d_t<bbm::BBM_CONFIG> out(bRec.wi.x, bRec.wi.y, bRec.wi.z);
     auto bbm_eval = bbm_bsdf_ptr->eval(in, out, flags, unit);
     
     /* convert solution to Mitsuba Spectrum */
-    result.fromLinearRGB(bbm_eval[0], bbm_eval[1], bbm_eval[2]);
+    result.fromLinearRGB(bbm::cast<Float>(bbm_eval[0]), bbm::cast<Float>(bbm_eval[1]), bbm::cast<Float>(bbm_eval[2]));
 
     /* TODO: single channel or multi-spectrum not implemented yet */
 	
@@ -141,9 +147,9 @@ public:
     if(bRec.mode & EImportance) unit = bbm::unit_t::Importance;
 
     /* eval PDF */
-    bbm::Vec3d_t<bbm::embed::config> in(bRec.wo.x, bRec.wo.y, bRec.wo.z);
-    bbm::Vec3d_t<bbm::embed::config> out(bRec.wi.x, bRec.wi.y, bRec.wi.z);    
-    auto bbm_pdf = bbm_bsdf_ptr->pdf(in, out, flags, unit);
+    bbm::Vec3d_t<bbm::BBM_CONFIG> in(bRec.wo.x, bRec.wo.y, bRec.wo.z);
+    bbm::Vec3d_t<bbm::BBM_CONFIG> out(bRec.wi.x, bRec.wi.y, bRec.wi.z);    
+    auto bbm_pdf = bbm::cast<Float>(bbm_bsdf_ptr->pdf(in, out, flags, unit));
 
     // Done.
     return bbm_pdf;
@@ -161,15 +167,15 @@ public:
     if(bRec.mode & EImportance) unit = bbm::unit_t::Importance;
     
     /* sample */
-    bbm::Vec3d_t<bbm::embed::config> out(bRec.wi.x, bRec.wi.y, bRec.wi.z);
-    bbm::Vec2d_t<bbm::embed::config> xi(sample.x, sample.y);
+    bbm::Vec3d_t<bbm::BBM_CONFIG> out(bRec.wi.x, bRec.wi.y, bRec.wi.z);
+    bbm::Vec2d_t<bbm::BBM_CONFIG> xi(sample.x, sample.y);
     auto bbm_sample = bbm_bsdf_ptr->sample(out, xi, flags, unit);
 
     /* Fill in sample record */
-    pdf = bbm_sample.pdf;
-    bRec.wo = Vector(bbm_sample.direction[0], bbm_sample.direction[1], bbm_sample.direction[2]);
-    bRec.sampledComponent = bbm::is_set(bbm_sample.flag, bbm::bsdf_flag::Diffuse) ? 0 : 1;
-    bRec.sampledType = bbm::is_set(bbm_sample.flag, bbm::bsdf_flag::Diffuse) ? EDiffuseReflection : EGlossyReflection;
+    pdf = bbm::cast<Float>(bbm_sample.pdf);
+    bRec.wo = Vector(bbm::cast<Float>(bbm_sample.direction[0]), bbm::cast<Float>(bbm_sample.direction[1]), bbm::cast<Float>(bbm_sample.direction[2]));
+    bRec.sampledComponent = bbm::select(bbm::is_set(bbm_sample.flag, bbm::bsdf_flag::Diffuse), 0, 1);
+    bRec.sampledType = bbm::select(bbm::is_set(bbm_sample.flag, bbm::bsdf_flag::Diffuse), EDiffuseReflection, EGlossyReflection);
        
     /* eval spectrum */
     if(pdf == 0 || Frame::cosTheta(bRec.wo) <= 0)
@@ -187,7 +193,7 @@ public:
   void serialize(Stream *stream, InstanceManager *manager) const
   {
     BSDF::serialize(stream, manager);
-    stream->writeString(bbm_python_str);
+    stream->writeString(bbm_str);
   }
 
   Float getRoughness(const Intersection& /*its*/, int /*component*/) const
@@ -199,7 +205,7 @@ public:
   std::string toString() const
   {
     std::ostringstream oss;
-    oss << "BBMbsdf[" << " bsdf = \"" << bbm_python_str << "\"]";
+    oss << "BBMbsdf[" << " bsdf = \"" << bbm_str << "\"]";
     return oss.str();
   }
 
@@ -208,8 +214,8 @@ public:
   MTS_DECLARE_CLASS()
 private:
   // attribtues
-  std::string bbm_python_str;
-  bbm::BsdfPtr_t<bbm::embed::config> bbm_bsdf_ptr;
+  std::string bbm_str;
+  bbm::bsdf_ptr<bbm::BBM_CONFIG> bbm_bsdf_ptr;
 };
 
 // ================ Hardware shader implementation ================

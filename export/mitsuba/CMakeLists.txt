@@ -88,7 +88,7 @@ file(GLOB SRC src/*cpp)
 # Set Compile Targets 
 #########################################################################
 bsdf_plugin(mitsuba_bbm ${SRC})
-target_compile_definitions(mitsuba_bbm PUBLIC BBM_CONFIG=floatRGB ${compile_def})
+target_compile_definitions(mitsuba_bbm PUBLIC ${compile_def})
 target_include_directories(mitsuba_bbm SYSTEM PUBLIC ${MITSUBA_PATH}/include)
 target_include_directories(mitsuba_bbm PUBLIC ${bbm_mitsuba_plugin_SOURCE_DIR}/include ${include_dirs})
 target_link_libraries(mitsuba_bbm ${link_libs})
