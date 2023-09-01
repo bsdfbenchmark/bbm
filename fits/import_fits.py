@@ -6,7 +6,7 @@
 
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.py}
     import bbm_floatRGB as bbm
-    fits = import_fitst("../fits/ngan_ward.txt", bbm)
+    fits = import_fitst("../fits/ngan_ward.fit", bbm)
     str( fits['alum-bronze'] )
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
