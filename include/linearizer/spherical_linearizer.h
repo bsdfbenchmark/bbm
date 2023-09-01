@@ -31,10 +31,10 @@ namespace bbm {
 
       \param samplesIn = number vec2d<size_t>(phi, theta) samples for incident directions
       \param samplesOut = number vec2d<size_t>(phi, theta) samples for outgoing directions
-      \param startIn = start vec2d<Scalar>(phi,theta) for incident directions (default 0)
-      \param endIn = end vec2d<Scalar(phi,theta) for incident directions (default HEMISPHERE)
-      \param startOut = start vec2d<Scalar>(phi,theta) for outgoing directions (default 0)
-      \param endOut = end vec2d<Sccalar>(phi,theta) for outgoing directions (default HEMISPHERE)
+      \param startIn = start Vec2d(phi,theta) for incident directions (default 0)
+      \param endIn = end Vec2d(phi,theta) for incident directions (default HEMISPHERE)
+      \param startOut = start Vec2d(phi,theta) for outgoing directions (default 0)
+      \param endOut = end Vec2d(phi,theta) for outgoing directions (default HEMISPHERE)
     ********************************************************************/
     inline spherical_linearizer(const vec2d<Size_t>& samplesIn,
                                 const vec2d<Size_t>& samplesOut,
@@ -136,7 +136,7 @@ namespace bbm {
       vec2d<Size_t> out_coord = bbm::cast<vec2d<Size_t>>(bbm::clamp((sph_out - _startOut) * _samplesOut / _sizeOut, 0, _samplesOut-1));
 
       // Done.
-      return bbm::select(mask, ((in_coord[0] * _samplesIn[1] + in_coord[1]) * _samplesOut[0] + out_coord[0]) * _samplesOut[1] + out_coord[1], size());
+      return cast<Size_t>(bbm::select(mask, ((in_coord[0] * _samplesIn[1] + in_coord[1]) * _samplesOut[0] + out_coord[0]) * _samplesOut[1] + out_coord[1], size()));
     }
       
   private:

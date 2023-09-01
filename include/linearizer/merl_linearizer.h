@@ -111,15 +111,15 @@ namespace bbm {
       spherical::phi(difference) = bbm::select( (spherical::phi(difference) >= Constants::Pi()), spherical::phi(difference) - Constants::Pi(), spherical::phi(difference) );
 
       // add epsilon to counter round-off errors
-      vec2d<Size_t> idxD = bbm::cast<vec2d<Size_t>>((difference/Constants::Sphere(0.5) + Constants::Epsilon()) * _samplesD);
-      vec2d<Size_t> idxH = bbm::cast<vec2d<Size_t>>(bbm::safe_sqrt(halfway/Constants::Sphere(0.5) + Constants::Epsilon()) * _samplesH);
+      auto idxD = bbm::floor((difference/Constants::Sphere(0.5) + Constants::Epsilon()) * _samplesD);
+      auto idxH = bbm::floor(bbm::safe_sqrt(halfway/Constants::Sphere(0.5) + Constants::Epsilon()) * _samplesH);
       
       // clamp to ensure it remain inside range
       idxD = bbm::clamp(idxD, 0, _samplesD - 1);
       idxH = bbm::clamp(idxH, 0, _samplesH - 1); 
       
       // Merge indices
-      return bbm::select(mask, (spherical::theta(idxH) * spherical::theta(_samplesD) + spherical::theta(idxD)) * spherical::phi(_samplesD) + spherical::phi(idxD), size());
+      return cast<Size_t>(bbm::select(mask, (spherical::theta(idxH) * spherical::theta(_samplesD) + spherical::theta(idxD)) * spherical::phi(_samplesD) + spherical::phi(idxD), size()));
     }
 
   private:
