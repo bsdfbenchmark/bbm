@@ -112,9 +112,15 @@ namespace bbm {
      ********************************************************************/
     virtual std::string toString(void) const override final
     {
-      std::stringstream ss;
-      ss << static_cast<const BSDFMODEL&>(*this);
-      return ss.str();
+      return bbm::toString( static_cast<const BSDFMODEL&>(*this) );
+    }
+
+    /*********************************************************************/
+    /*! \brief construct the bsdf from a string
+     *********************************************************************/
+    static bsdf fromString(const std::string& str)
+    {
+      return bsdf( bbm::fromString<BSDFMODEL>(str) );
     }
     
     /*********************************************************************/

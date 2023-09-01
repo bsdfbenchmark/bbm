@@ -144,7 +144,7 @@ namespace bbm {
 
   \param ClassName = name of constructor/class
   \param Args = name to give to bbm::args to access the arguments.
-  \param ... = lost of bbm::arg (or a defintion of a single bbm::args)
+  \param ... = lots of bbm::arg (or a defintion of a single bbm::args)
                used to define the arguments to the constructor
 
   Creates a constructor (with forwarding) that takes a single bbm::args as
@@ -160,6 +160,9 @@ namespace bbm {
     // ...body... 
   }
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  This example creates a constructor which is equivalent to the regular C++
+  constructor ``foo(float a, float b)``.
 **************************************************************************/
 #define BBM_CONSTRUCTOR(ClassName, Args, ...)                             \
   using constructor_args_t = bbm::add_args_t<__VA_ARGS__>;                \

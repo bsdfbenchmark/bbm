@@ -5,8 +5,6 @@
 #include "concepts/ndf.h"
 #include "concepts/reflection.h"
 
-#include "util/toString.h"
-
 #include "core/spherical.h"
 #include "core/transform.h"
 #include "core/vec_transform.h"
@@ -31,18 +29,7 @@ namespace bbm {
   template<typename NDF> requires bbm::concepts::ndf<NDF>
     std::ostream& operator<<(std::ostream& s, const NDF& ndf)
   {
-    s << NDF::name;
-
-    // toString method has preference
-    if constexpr (has_toString<NDF>) s << ndf.toString();
-
-    // other use reflection if available
-    else if constexpr (bbm::concepts::reflection::supported<NDF>) s << bbm::reflection::attributes(ndf);
-
-    // else empty '()'
-    else s << "()";
-
-    // Done.
+    s << bbm::toString(ndf);
     return s;
   }
 

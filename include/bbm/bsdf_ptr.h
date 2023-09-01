@@ -2,6 +2,7 @@
 #define _BBM_BSDF_PTR_H_
 
 #include "concepts/bsdf_ptr.h"
+#include "concepts/stringconvert.h"
 
 #include "util/pointer.h"
 #include "core/error.h"

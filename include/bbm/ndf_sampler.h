@@ -4,6 +4,7 @@
 #include <map>
 
 #include "concepts/bsdfmodel.h"
+#include "util/reflection.h"
 #include "util/reference.h"
 #include "ndf/sampler.h"
 
@@ -19,7 +20,7 @@
 
 namespace bbm {
 
-  template<typename BSDFMODEL, size_t samplesTheta=90, size_t samplesPhi=1, string_literal NAME=string_literal("NDFSampler_") + BSDFMODEL::name> requires concepts::bsdfmodel<BSDFMODEL>
+  template<typename BSDFMODEL, size_t samplesTheta=90, size_t samplesPhi=1, string_literal NAME=BSDFMODEL::name> requires concepts::bsdfmodel<BSDFMODEL>
     class ndf_sampler : public BSDFMODEL
   {
     BBM_BASETYPES( BSDFMODEL );
@@ -34,7 +35,7 @@ namespace bbm {
     {
       BBM_BASETYPES(void); // Avoid clash with the base_type of ndf_sampler
       BBM_IMPORT_CONFIG( BSDFMODEL );
-      static constexpr string_literal name = NAME;
+      static constexpr string_literal name = "backscatter_" + NAME;
       
       backscatter(void) {}
       backscatter(const BSDFMODEL* src, bsdf_flag c, unit_t u) : component(c), unit(u), model(src) {}
@@ -47,7 +48,7 @@ namespace bbm {
       bsdf_flag component;          //< component to sample
       unit_t unit;                  //< unit to sample
       const BSDFMODEL* model;       //< pointer to BSDF model to sample
-      BBM_ATTRIBUTES( attributes(*model) );
+      BBM_ATTRIBUTES( reflection::attributes(*model) );
     };
 
     BBM_CHECK_RAW_CONCEPT(concepts::ndf, backscatter);
@@ -91,8 +92,8 @@ namespace bbm {
       // Sample the correct ndf based on (component,unit)
       Vec3d halfway;
 
-      for(auto u : all_unit_t)
-        for(auto c : all_bsdf_flag)
+      for(auto u : bbm::reflection::enum_v<unit_t>)
+        for(auto c : bbm::reflection::enum_v<bsdf_flag>)
         {
           auto sample_mask = mask && bbm::eq(component, c) && bbm::eq(unit, u);
           if(bbm::any(sample_mask))
@@ -136,8 +137,8 @@ namespace bbm {
       Vec3d h = halfway(in, out);
       Value pdf(0);
 
-      for(auto u : all_unit_t)
-        for(auto c : all_bsdf_flag)
+      for(auto u : bbm::reflection::enum_v<unit_t>)
+        for(auto c : bbm::reflection::enum_v<bsdf_flag>)
         {
           auto pdf_mask = mask && bbm::eq(component, c) && bbm::eq(unit, u);
           if(bbm::any(pdf_mask))

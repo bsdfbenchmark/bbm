@@ -6,6 +6,7 @@
 
 #include "core/error.h"
 
+#inckude "bbm/config.h"
 #include "bbm/loss.h"
 
 /************************************************************************/
@@ -22,7 +23,7 @@ namespace bbm {
 
     \tparam CONF = bbm configuration
   ***********************************************************************/
-  template<typename CONF>
+  template<typename CONF> requires concepts::config<CONF>
     class loss_ptr : public virtual loss_base<CONF>
   {
   public:

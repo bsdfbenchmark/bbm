@@ -17,7 +17,7 @@ namespace bbm {
   /*! \brief Structure to hold a sample's direction and PDF
    *********************************************************************/    
   template<typename CONF> requires concepts::config<CONF>
-  struct bsdfsample
+    struct bsdfsample
   {
     BBM_IMPORT_CONFIG( CONF );
 

@@ -10,8 +10,6 @@
 #include "core/attribute.h"
 #include "core/ior.h"
 
-
-
 /***********************************************************************/
 /*! \file bsdf_attribute.h
   \brief Default bsdf attribute types

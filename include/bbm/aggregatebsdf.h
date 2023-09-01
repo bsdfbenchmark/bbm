@@ -6,7 +6,8 @@
 #include <utility>
 #include <algorithm>
 
-#include "concepts/bsdf.h"
+#include "concepts/config.h"
+#include "concepts/stringconvert.h"
 
 #include "util/multirange_for.h"
 
@@ -33,25 +34,25 @@ namespace bbm {
     Note: the aggregatebsdf does not own the BSDFs, instead it takes
     bsdf_ptrs as input.  
   ***********************************************************************/
-  template<typename CONF>
-  class aggregatebsdf : public bsdf_base<CONF>
+  template<typename CONF, string_literal NAME="Aggregate"> requires concepts::config<CONF>
+    class aggregatebsdf : public bsdf_base<CONF>
   {
   public:
     BBM_IMPORT_CONFIG( CONF );
-    static constexpr string_literal name = "AggregateBsdf";
+    static constexpr string_literal name = NAME;
     BBM_BSDF_FORWARD;
     
     //! \brief Construct an aggregate bsdf from a list of bsdf_ptrs.
     template<typename... BSDFS> requires concepts::matching_config<Config, BSDFS...> && (concepts::bsdf_ptr<BSDFS> && ...)
-      aggregatebsdf(const BSDFS&... src) : _bsdfs({src.ptr()...}) {}
+      aggregatebsdf(const BSDFS&... src) : _bsdfs({src...}) {}
     
     //! \brief Construct an aggregate bsdf from iterators to list of 'bsdf_ptrs'
-    template<typename ITR> requires std::input_or_output_iterator<ITR> && concepts::bsdf< std::iter_reference_t<ITR> > && concepts::matching_config< std::iter_reference_t<ITR> >
+    template<typename ITR> requires std::input_or_output_iterator<ITR> && concepts::bsdf< std::iter_reference_t<ITR> > && concepts::matching_config< std::iter_reference_t<ITR> > && concepts::bsdf_ptr< std::iter_value_t<ITR> >
       aggregatebsdf(const ITR& begin, const ITR& end)
     {
       // copy
       for(ITR itr = begin; itr != end; ++itr)
-        _bsdfs.push_back(itr->ptr());
+        _bsdfs.push_back(*itr);
     }
     
     //! \brief Copy Constructor
@@ -211,19 +212,30 @@ namespace bbm {
 
 
     /******************************************************************/
-    /*! \brief Fancy print the BSDF to a string
+    /*! \brief Convert the aggregatebsdf to string
      ******************************************************************/
     virtual std::string toString(void) const override final
     {
-      std::string result;
-      for(auto& bsdf : _bsdfs)
-      {
-        if(!result.empty()) result += ", ";
-        result += bsdf->toString();
-      }
-      return std::string(name.value) + "(" + result + ")";
+      return bbm::toString(name) + bbm::toString(_bsdfs);
     }
 
+    /*******************************************************************/
+    /*! \brief Construct the aggregate bsdf from a string
+     *******************************************************************/
+    static inline aggregatebsdf fromString(const std::string& str)
+    {
+      auto [key, value] = string::get_keyword(str);
+
+      // check name
+      if(key != std::string(aggregatebsdf::name)) throw std::invalid_argument(std::string("BBM: mismatched object name ") + key + ", expected " + std::string(aggregatebsdf::name));
+      
+      // read vector of bsdf_ptrs
+      auto bsdfs = bbm::fromString<bbm::vector<bsdf_ptr<Config>>>(value);
+
+      // Done: create from vector.
+      return aggregatebsdf(std::begin(bsdfs), std::end(bsdfs));
+    }
+    
     /*******************************************************************/
     /*! \name Parameter Enumeration
      *******************************************************************/
@@ -232,7 +244,7 @@ namespace bbm {
       bbm::vector<Value&> result;
       for(auto& bsdf : _bsdfs)
       {
-        auto param = bbm::parameter_values(*bsdf, flags);
+        auto param = bbm::parameter_values(bsdf, flags);
         result.insert(result.end(), param.begin(), param.end());
       }
       return result;
@@ -243,7 +255,7 @@ namespace bbm {
       bbm::vector<const Value&> result;
       for(auto& bsdf : _bsdfs)
       {
-        auto param = bbm::parameter_values(std::as_const(*bsdf), flags);
+        auto param = bbm::parameter_values(std::as_const(bsdf), flags);
         result.insert(result.end(), param.begin(), param.end());
       }
       return result;
@@ -254,7 +266,7 @@ namespace bbm {
       bbm::vector<Value> result;
       for(auto& bsdf : _bsdfs)
       {
-        auto param = bbm::parameter_default_values(*bsdf, flags);
+        auto param = bbm::parameter_default_values(bsdf, flags);
         result.insert(result.end(), param.begin(), param.end());
       }
       return result;
@@ -265,7 +277,7 @@ namespace bbm {
       bbm::vector<Value> result;
       for(auto& bsdf : _bsdfs)
       {
-        auto param = bbm::parameter_lower_bound(*bsdf, flags);
+        auto param = bbm::parameter_lower_bound(bsdf, flags);
         result.insert(result.end(), param.begin(), param.end());
       }
       return result;      
@@ -276,7 +288,7 @@ namespace bbm {
       bbm::vector<Value> result;
       for(auto& bsdf : _bsdfs)
       {
-        auto param = bbm::parameter_upper_bound(*bsdf, flags);
+        auto param = bbm::parameter_upper_bound(bsdf, flags);
         result.insert(result.end(), param.begin(), param.end());
       }
       return result;      
@@ -287,7 +299,7 @@ namespace bbm {
     //////////////////
     // Data Members //
     //////////////////
-    std::vector<std::shared_ptr<bsdf_base<Config>>> _bsdfs;
+    std::vector<bsdf_ptr<Config>> _bsdfs;
   };
 
   

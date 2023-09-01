@@ -28,36 +28,8 @@ namespace bbm {
     All                 = Specular | Diffuse,
   };
 
-  /////////////////////
-  // ostream support //
-  /////////////////////
-  std::ostream& operator<<(std::ostream& s, const bbm::bsdf_attr& flag)
-  {
-    if(is_set(flag, bbm::bsdf_attr::Dependent))
-    {
-      s << "Depdent";
-      if( !is_set(flag & ~bbm::bsdf_attr::Dependent, bbm::bsdf_attr::None) ) s << " ";
-    }
-    
-    if(flag == bbm::bsdf_attr::None) s << "None";
-    else if(flag == bbm::bsdf_attr::All) s << "All";
-    else
-    {
-      std::vector<std::string> prop;
-      if( bbm::is_set(bbm::bsdf_attr::Diffuse, flag)) prop.push_back("Diffuse");
-      if( bbm::is_set(bbm::bsdf_attr::Specular, flag)) prop.push_back("Specular");
-      if( bbm::is_set(bbm::bsdf_attr::Scale, flag) && !is_set(bbm::bsdf_attr::Parameter, flag)) prop.push_back("Scale");
-      if( bbm::is_set(bbm::bsdf_attr::Parameter, flag) && !is_set(bbm::bsdf_attr::Scale, flag)) prop.push_back("Parameter");
-
-      for(auto& p : prop)
-      {
-        s << p;
-        if(&p != &prop.back()) s << " ";
-      }
-    }
-
-    return s;
-  }
+  BBM_ENUM(bsdf_attr, None, DiffuseScale, DiffuseParameter, SpecularScale, SpecularParameter, Dependent, Diffuse, Specular, Scale, Parameter, All);
+  
 } // end bbm namespace
 
 #endif /* _BBM_BSDF_ATT_FLAG_H_ */

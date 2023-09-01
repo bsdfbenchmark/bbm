@@ -5,7 +5,6 @@
 #include "concepts/bsdfmodel.h"
 
 #include "util/reflection.h"
-#include "util/toString.h"
 
 #include "core/spherical.h"
 #include "core/transform.h"
@@ -35,11 +34,6 @@
 
   Thus for unit_t:Radiance: in == light and out = view.
     
-  Printing of bsdfmodels starts with the name followed by:
-  + if the bsdfmodel has a toString() method, then use this.
-  + else if the bsdfmodel support reflection, then print name and attributes
-  + else print empty '()'
-    
 *************************************************************************/
 
 namespace bbm{
@@ -54,11 +48,13 @@ namespace bbm{
   } // end detail namespace
 } // end bbm namespace
 
+
+#ifdef BBM_BSDF_ENABLE_FORWARD
 /************************************************************************/
 /*! \brief Helper Macro to forward bbm::args arguments to eval, sample, pdf,
     and reflectance
 *************************************************************************/
-#define BBM_BSDF_FORWARD                                                 \
+  #define BBM_BSDF_FORWARD                                               \
   BBM_FORWARD_CPP_ARGS_CONST(eval, bbm::arg<const Vec3d&, "in">,         \
                              bbm::arg<const Vec3d&, "out">,              \
                              bbm::arg<BsdfFlag, "component", bbm::detail::DefBsdfAll>, \
@@ -79,26 +75,20 @@ namespace bbm{
                              bbm::arg<bbm::unit_t, "unit", bbm::detail::DefUnitRad>, \
                              bbm::arg<Mask, "mask", bbm::detail::DefTrue>); \
 
+#else
+  #define BBM_BSDF_FORWARD
+#endif /* BBM_BSDF_FORWARD */
+
                              
 namespace bbm {
 
-  using namespace bbm::reflection;
-  
+  /**********************************************************************/
+  /*! \brief ostream output uses toString conversion
+   **********************************************************************/
   template<typename BSDFMODEL> requires bbm::concepts::bsdfmodel<BSDFMODEL>
     std::ostream& operator<<(std::ostream& s, const BSDFMODEL& model)
   {
-    s << std::decay_t<BSDFMODEL>::name;
-    
-    // toString method has preference
-    if constexpr (has_toString<BSDFMODEL>) s << model.toString();
-
-    // otherwise check if has reflection, print attributes
-    else if constexpr (bbm::concepts::reflection::supported<BSDFMODEL>) s << bbm::reflection::attributes(model);
-
-    // otherwise print empty '()'
-    else s << "()";
-    
-    // Done.
+    s << bbm::toString(model);
     return s;
   }
 

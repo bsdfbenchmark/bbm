@@ -51,7 +51,7 @@ namespace bbm {
     Implements: concepts::bsdf
   **********************************************************************/
   template<typename CONF> requires concepts::config<CONF>
-  struct bsdf_base
+    struct bsdf_base
   {
   public:
     BBM_IMPORT_CONFIG( CONF );
@@ -137,7 +137,7 @@ namespace bbm {
   template<typename BSDF> requires bbm::concepts::bsdf<BSDF>
     std::ostream& operator<<(std::ostream& s, const BSDF& bsdf)
   {
-    s << bsdf.toString();
+    s << bbm::toString(bsdf);
     return s;
   }
 

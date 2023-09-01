@@ -38,7 +38,7 @@ namespace bbm {
       // enumerate if it is an enumerable attribute that meets the flag
       CONSTFOR(idx, reflection::attributes_size<MODEL>,
       {
-        auto&& val = std::get<idx>( attributes(std::forward<MODEL>(model)) );
+        auto&& val = std::get<idx>( reflection::attributes(std::forward<MODEL>(model)) );
         using val_t = decltype(val);
 
         if constexpr (concepts::bsdf_attribute<val_t> && is_enumerable_v<Value, val_t>)

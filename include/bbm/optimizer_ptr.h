@@ -6,6 +6,7 @@
 
 #include "core/error.h"
 
+#include "bbm/config.h"
 #include "bbm/optimizer.h"
 
 /************************************************************************/
@@ -22,7 +23,7 @@ namespace bbm {
 
     \tparam CONF = bbm configuration
   ***********************************************************************/
-  template<typename CONF>
+  template<typename CONF> requires concepts::config<CONF>
     class optimizer_ptr : public virtual optimizer_base<CONF>
   {
   public:
