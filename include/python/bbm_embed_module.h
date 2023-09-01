@@ -21,8 +21,7 @@ namespace detail {
   {
     BBM_PYTHON_CORE
     #include "export/bbm_python.h"
-    #include "bbm_bsdfmodel.h"
-    #include "bbm_staticmodel.h"
+    #include "bbm_bsdfmodels.h"
     #include "export/clear_export.h"
   }
 } // end detail namespace

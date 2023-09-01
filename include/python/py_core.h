@@ -44,7 +44,8 @@ namespace bbm {
       void core(py::module& m)
     {
       BBM_IMPORT_CONFIG( CONF );
-
+      using BsdfPtr = bsdf_ptr<Config>;
+      
       // Export bsdf_flag
       py::enum_<bsdf_flag>(m, "bsdf_flag")
         .value("None", bsdf_flag::None)
@@ -112,7 +113,7 @@ namespace bbm {
         ;
 
       //! \brief Export aggregate BSDFs
-      m.def("AggregateBsdf", [](py::args args)
+      m.def("Aggregate", [](py::args args)
       {
         bbm::vector<BsdfPtr&> arg_list;
         for(auto& a : args)

@@ -4,8 +4,8 @@
 #include "pybind11/pybind11.h"
 namespace py = pybind11;
 
+#include "concepts/stringconvert.h"
 #include "util/typestring.h"
-#include "util/toString.h"
 #include "python/py_arg.h"
 #include "bbm/bsdf_ptr.h"
 #include "bbm/bsdf.h"
@@ -36,15 +36,15 @@ namespace bbm {
         if constexpr (idx != 0) result += ", ";
 
         // add type (if requested)
-        if constexpr (TYPE) result += toString(typestring<typename arg::type>) + " ";
+        if constexpr (TYPE) result += bbm::toString(typestring<typename arg::type>) + " ";
         
         // add name (use <unnamed> if empty)
         if constexpr (arg::name.empty) result += "<unnamed>";
-        else result += toString(arg::name);
+        else result += bbm::toString(arg::name);
 
         // add default value (if exists)
         if constexpr (std::is_constructible_v<arg>)
-          result += std::string(" = ") + toString(arg().value());
+          result += std::string(" = ") + bbm::toString(arg().value());
       });
 
       // Done.

@@ -68,7 +68,7 @@ namespace bbm {
         Returns a BsdfPtr objects to a Lambertian bsdf.
       *******************************************************************/
       template<typename RET_TYPE>
-      RET_TYPE capture(const std::string& prog) const
+        RET_TYPE capture(const std::string& prog) const
       {
         try {
           return py::eval(prog, _scope).cast<RET_TYPE>();
