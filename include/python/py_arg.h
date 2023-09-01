@@ -1,10 +1,11 @@
-#ifndef _BBM_PY_ATTRIBUTE_H_
-#define _BBM_PY_ATTRIBUTE_H_
+#ifndef _BBM_PY_ARG_H_
+#define _BBM_PY_ARG_H_
 
 #include <utility>
 #include <stdexcept>
 
 #include "concepts/constructor.h"
+#include "python/py_cast.h"
 
 /************************************************************************/
 /*! \file py_arg.h
@@ -30,13 +31,13 @@ namespace bbm {
         // check if name exists
         if(kwargs.size() > 0 && kwargs.contains( arg_t::name.value ))
         {
-          return arg_t( py::cast<type>( kwargs[ arg_t::name.value ] ) );
+          return arg_t( py_cast<type>::cast( kwargs[ arg_t::name.value ] ) );
         }
 
         // otherwise copy from arg if available
         else if(args.size() > IDX)
         {
-          return arg_t( py::cast<type>(args[IDX]) );
+          return arg_t( py_cast<type>::cast(args[IDX]) );
         }
 
         // otherwise return default value?
@@ -121,4 +122,4 @@ namespace bbm {
   } // end python namepace
 } // end bbm namespace
 
-#endif /* _BBM_PY_ATTRIBUTE_H_ */
+#endif /* _BBM_PY_ARG_H_ */
