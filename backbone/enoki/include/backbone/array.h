@@ -21,5 +21,5 @@ template<typename T> requires enoki::is_array_v<T>
 
 template<typename T> requires enoki::is_array_v<T>
   inline auto operator--(const T& a, int) { auto ret = a - 1; return ret; }
-  
+
 #endif /* _BBM_ENOKI_ARRAY_H_ */

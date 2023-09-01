@@ -105,4 +105,40 @@ namespace backbone {
 } // end backbone namespace
 
 
+namespace enoki {
+
+  namespace detail {
+
+    template<typename T, typename D>
+    using binary_cast_t = std::conditional_t<
+      std::floating_point<enoki::scalar_t<std::decay_t<bbm::attribute_value_t<D>>>> && std::is_scalar_v<std::decay_t<bbm::attribute_value_t<T>>>,
+      const enoki::scalar_t<std::decay_t<bbm::attribute_value_t<D>>>&, 
+      const std::decay_t<bbm::attribute_value_t<T>>& >; 
+    
+
+  } // end detail namespace
+    
+  /**********************************************************************/
+  /*! \brief Helper Macro for that ensures that binary math operators with
+      rvalues do not cast the non-rvalue operant
+  ***********************************************************************/
+#define BBM_ENOKI_BINARY_OP(OpName)                                      \
+  template<typename T, typename D>                                       \
+  inline constexpr auto OpName(T&& t, D&& d) -> decltype( enoki::OpName< enoki::detail::binary_cast_t<T,D>, enoki::detail::binary_cast_t<D,T> >( t, d ) ) \
+  {                                                                      \
+    return enoki::OpName<enoki::detail::binary_cast_t<T,D>, enoki::detail::binary_cast_t<D,T>>(t, d); \
+  }                                                                      \
+
+  /*
+  BBM_ENOKI_BINARY_OP(operator+);
+  BBM_ENOKI_BINARY_OP(operator-);
+  BBM_ENOKI_BINARY_OP(operator*);
+  BBM_ENOKI_BINARY_OP(operator/);
+  */
+  #undef BBM_ENOKI_BINARY_OP
+}
+
+
+
+
 #endif /* _BBM_ENOKI_MATH_H_ */

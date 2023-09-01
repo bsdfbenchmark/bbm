@@ -21,6 +21,8 @@
   #include "enoki/python.h"
 #endif /* BBM_PYTHON */
 
+#include "backbone/stringconvert.h"
+
 /************************************************************************/
 /*! \file backbone.h
 
@@ -32,11 +34,11 @@ namespace bbm {
 
   /*** Implementation detail ***/
   namespace detail {
-    template<typename VALUE, string_literal NAME>
+    template<typename VALUE, string_literal NAME, typename CONF>
       struct rgbConfig
     {
       static constexpr string_literal name = NAME;
-      using Config = rgbConfig<VALUE,NAME>;
+      using Config = CONF;
       using Value = VALUE;
       using Spectrum = backbone::color<Value>;
       static Spectrum wavelength(void) { return {0.645, 0.526, 0.444}; } // in micron
@@ -46,23 +48,23 @@ namespace bbm {
   /**********************************************************************/
   /*! @{ \name Config with non-packet/non-diff floating point RGB colors
    **********************************************************************/
-  struct floatRGB : public detail::rgbConfig<float, "floatRGB"> {};
-  struct doubleRGB : public detail::rgbConfig<double, "doubleRGB"> {};
+  struct floatRGB : public detail::rgbConfig<float, "floatRGB", floatRGB> {};
+  struct doubleRGB : public detail::rgbConfig<double, "doubleRGB", doubleRGB> {};
   //! @}
   
   /**********************************************************************/
   /*! @{ \name Config with packet floating point RGB colors
    **********************************************************************/
-  struct floatPacketRGB : public detail::rgbConfig<enoki::Packet<float>, "floatPacketRGB"> {};
-  struct doublePacketRGB : public detail::rgbConfig<enoki::Packet<double>, "doublePacketRGB"> {};
+  struct floatPacketRGB : public detail::rgbConfig<enoki::Packet<float>, "floatPacketRGB", floatPacketRGB> {};
+  struct doublePacketRGB : public detail::rgbConfig<enoki::Packet<double>, "doublePacketRGB", doublePacketRGB> {};
   //! @}
   
 #ifdef ENOKI_AUTODIFF
   /**********************************************************************/
   /*! @{ \name Config with differentiable floating point RGB colors
    **********************************************************************/
-  struct floatDiffRGB : public detail::rgbConfig<enoki::DiffArray<float>, "floatDiffArray"> {};
-  struct doubleDiffRGB : public detail::rgbConfig<enoki::DiffArray<double>, "doubleDiffArray"> {};
+  struct floatDiffRGB : public detail::rgbConfig<enoki::DiffArray<float>, "floatDiffArray", floatDiffRGB> {};
+  struct doubleDiffRGB : public detail::rgbConfig<enoki::DiffArray<double>, "doubleDiffArray", doubleDiffRGB> {};
   //! @}
 #endif /* ENOKI_AUTODIFF */
 

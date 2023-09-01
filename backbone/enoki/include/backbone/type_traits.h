@@ -107,7 +107,12 @@ namespace backbone {
     template<typename T>
       inline constexpr bool is_diff_v = std::disjunction< detail::is_diff<std::decay_t<T>>, detail::is_diff<enoki::value_t<std::decay_t<T>>> >::value;
 
-    
+     /*******************************************************************/
+     /*! \brief true if type is DiffArray
+     ********************************************************************/
+     template<typename T>
+       inline constexpr bool is_DiffArray_v = detail::is_diff<std::decay_t<T>>::value;
+  
     /*** Implementation details for remove_diff_t ***/
     namespace detail {
       template<typename T> struct remove_diff { using type = T; };
@@ -175,6 +180,29 @@ namespace backbone {
       inline constexpr bool is_packet_v = std::disjunction< detail::is_packet<std::decay_t<T>>, detail::is_packet<enoki::value_t<std::decay_t<T>>> >::value;
 
 
+    /*** Implementation detauls for packet_size ***/
+    namespace detail {
+      template<typename T> struct packet_size { static constexpr size_t size = 1; };
+
+      template<typename T> requires detail::is_packet<std::decay_t<T>>::value
+        struct packet_size<T>
+      {
+        static constexpr size_t size = std::decay_t<T>::Size;
+      };
+
+      template<typename T> requires detail::is_packet<enoki::value_t<std::decay_t<T>>>::value
+        struct packet_size<T>
+      {
+        static constexpr size_t size = detail::packet_size<enoki::value_t<std::decay_t<T>>>::size;
+      };
+    } // end detail namespace
+
+    /********************************************************************/
+    /*! \brief get packet size from type
+     ********************************************************************/
+    template<typename T>
+      static constexpr size_t packet_size = detail::packet_size<T>::size;
+  
     /*** Implementation details for remove_packet_t ***/
     namespace detail {
       template<typename T> struct remove_packet { using type = T; };
@@ -189,6 +217,7 @@ namespace backbone {
       };  
     } // end detail namespace
 
+  
     /********************************************************************/
     /*! \brief Strip packet from type T.
      ********************************************************************/
