@@ -6,7 +6,6 @@
 #include "concepts/util.h"
 
 #include "util/constfor.h"
-#include "util/toString.h"
 #include "util/string_literal.h"
 
 /************************************************************************/
@@ -132,7 +131,7 @@ namespace bbm {
   {
   public:
     using value_type = T;
-    
+
     //! \brief query name by index
     template<size_t IDX> requires (IDX < sizeof...(NAMES))
       static constexpr auto name = std::get<IDX>(std::make_tuple(NAMES...));
@@ -144,6 +143,10 @@ namespace bbm {
     template<string_literal NAME>
       static constexpr bool has_name = (named<T,NAMES...>::template _find_name<0,NAME,NAMES...>() != sizeof...(NAMES));
 
+    //! \brief find index of name (size if not found); uses a linear search
+    template<string_literal NAME>
+      static constexpr size_t find_name = named<T,NAMES...>::template _find_name<0,NAME,NAMES...>();
+    
     //! \brief size (number of names/elements in value_type)
     static constexpr size_t size = sizeof...(NAMES);
     
@@ -224,7 +227,7 @@ namespace bbm {
         if constexpr (bbm::is_string_type_v< std::tuple_element_t<idx, named> >) s << std::string("\"") + std::get<idx>(n) << std::string("\"");
 
         // otherwise print value
-        else s << bbm::toString(std::get<idx>(n));
+        else s << std::get<idx>(n);
       });
       s << ")";
       return s;
@@ -240,20 +243,7 @@ namespace bbm {
     }
   };
 
-  /**********************************************************************/
-  /*! @{ \name Typedefs
-  ***********************************************************************/
-  template<typename T0, string_literal N0, typename T1, string_literal N1>
-    using named2 = bbm::named<std::tuple<T0,T1>, N0, N1>;
 
-  template<typename T0, string_literal N0, typename T1, string_literal N1, typename T2, string_literal N2>
-     using named3 = bbm::named<std::tuple<T0,T1,T2>, N0, N1, N2>;
-
-  template<typename T0, string_literal N0, typename T1, string_literal N1, typename T2, string_literal N2, typename T3, string_literal N3>
-    using named4 = bbm::named<std::tuple<T0,T1,T2,T3>, N0, N1, N2, N3>;
-  //! @}
-  
-  
   /**********************************************************************/
   /*! @{ \name Type traits
    **********************************************************************/
@@ -294,15 +284,16 @@ namespace bbm {
   template<typename U, typename V>
     static constexpr bool named_equivalence_v = named_equivalence<U,V>::value;
   //! @}
-  
+
   /**********************************************************************/
-  /*! \brief Make a named version of an unnamed container T or rename a named container T.
+  /*! \brief Make a named of a gettable type (with size == #NAMES); renames if
+      the type is a named container.
    **********************************************************************/
-  template<string_literal... NAMES, typename T> requires (sizeof...(NAMES) == std::tuple_size_v<std::decay_t<T>>)
+  template<string_literal... NAMES, typename T> requires (sizeof...(NAMES) == 0) || (concepts::gettable<T> && (sizeof...(NAMES) == std::tuple_size_v<std::decay_t<T>>))
     constexpr named<anonymize_t<T>, NAMES...> make_named(T&& t) { return named<anonymize_t<T>,NAMES...>{anonymize_v(std::forward<T>(t))}; }
 
   /**********************************************************************/
-  /*! \brief Make a named tuple
+  /*! \brief Make a named tuple from a list of arguments (number of arguments == #NAMES)
    **********************************************************************/
   template<string_literal... NAMES, typename... Ts> requires (sizeof...(NAMES) == sizeof...(Ts))
     constexpr auto make_named(Ts&&... ts) { return make_named<NAMES...>(std::make_tuple(std::forward<Ts>(ts)...)); }
@@ -328,131 +319,8 @@ namespace bbm {
   template<string_literal NAME, string_literal... SUBNAME, typename T> requires is_named_v<T>
     inline constexpr decltype(auto) get(const T& src) { return src.template get<NAME, SUBNAME...>(); }
   //! @}
-
-
-  /**********************************************************************/
-  /*! \brief cat named types
-
-    named_cat( named<std::tuple<...>, "A", "B">{a,b}, named<std::tuple<...>, "C">{c} )
-
-    yields
-
-    named<std::tuple<...>, "A", B", "C">{a,b,c}
-   **********************************************************************/
-  template<typename... T> requires (is_named_v<T> && ...)
-    constexpr auto named_cat(T&&... t)
-  {
-    // helper lambda; use tuple_cat on names and values
-    auto merge = [&]<size_t... IDX>(std::index_sequence<IDX...>)
-    {
-      constexpr auto names = std::tuple_cat( std::decay_t<T>::names...);
-      return make_named< std::get<IDX>(names)... >( std::tuple_cat(t.values()...) );
-    };
-
-    // if empty return default; otherwise call helper lambda
-    if constexpr (sizeof...(T) == 0) return named<std::tuple<>>();
-    else return merge(std::make_index_sequence< (std::tuple_size_v<std::decay_t<T>> + ...) >{});
-  }
-
-  template<typename... T> requires (is_named_v<T> && ...)
-    using named_cat_t = decltype( named_cat(std::declval<T>()...) );
-
-
-  /**********************************************************************/
-  /*! \brief prefix names in type
-
-    prefix_names<"BLA_", named<std::tuple<...>, "A", "B">{a,b}
-
-    yields
-
-    named<std::tuple<...>, "BLA_A", "BLA_B">{a,b}
-    *********************************************************************/
-  template<string_literal PREFIX, typename T, string_literal... NAMES>
-    inline constexpr auto prefix_names(named<T, NAMES...> t)
-  {
-    return static_cast<named<T, (PREFIX+NAMES)...>>(t);
-  }
-
-  template<string_literal PREFIX, typename T>  requires is_named_v<T>
-    using prefix_names_t = decltype(prefix_names<PREFIX>(std::declval<T>()));
-  
-  /**********************************************************************/
-  /*! \brief postfix names in type
-
-    postfix_names<"_BLA", named<std::tuple<...>, "A", "B">{a,b}
-
-    yields
-
-    named<std::tuple<...>, "A_BLA", "B_BLA">{a,b}
-  *********************************************************************/
-  template<string_literal POSTFIX, typename T, string_literal... NAMES>
-    inline constexpr auto postfix_names(named<T, NAMES...> t)
-  {
-    return static_cast<named<T, (NAMES + POSTFIX)...>>(t);
-  }
-
-  template<string_literal POSTFIX, typename T>  requires is_named_v<T>
-    using postfix_names_t = decltype(post_names<POSTFIX>(std::declval<T>()));
-
-  
-  /*** Named flatten implementation details ***/
-  namespace detail {
-
-    template<string_literal PREFIX, string_literal SEP, bool cat_names, typename T>
-      inline constexpr auto named_flatten(T&& t)
-    {
-      // base case: T is not named
-      if constexpr (!is_named_v<T>) { return make_named<PREFIX>(std::forward_as_tuple(t)); }
-
-      // else: recurse
-      else
-      {
-        auto flatten = [&]<size_t... IDX>(std::index_sequence<IDX...>)
-        {
-          constexpr auto names = std::decay_t<T>::names;
-          return named_cat( (named_flatten<std::get<IDX>(names), SEP, cat_names>(std::get<IDX>(std::forward<T>(t))) )...);
-        };
-
-        // cat all
-        auto result = flatten(std::make_index_sequence<std::decay_t<T>::size>{});
-
-        // prefix names if requested.
-        if constexpr (cat_names && !PREFIX.empty) return prefix_names<PREFIX + SEP>( result );
-        else return result;
-      }
-    }
-
-  } // end detail namespace
-  
-  /**********************************************************************/
-  /*! \brief flatten a named type without merging names
-
-    named_flatten( named< std::tuple<named<std::tuple<float, char>, "A", "B">, int>, "C", "D" > )
-
-    yields
-
-    named<std::tuple<float, char, int>, "A", "B", "D">
-   **********************************************************************/
-  template<typename T> requires is_named_v<T>
-    inline constexpr auto named_flatten(T&& t) { return bbm::detail::named_flatten<"", "", false>(std::forward<T>(t));  }
-
-  /**********************************************************************/
-  /*! \brief flatten a named type with merging names
-
-    merge_named_flatten( named< std::tuple<named<std::tuple<float, char>, "A", "B">, int>, "C", "D" > )
-
-    yields
-
-    named<std::tuple<float, char, int>, "C.A", "C.B", "D">
-
-    The default seperator symbol is ".", but this can be changed by passing a
-    different symbols as the first template argument.
-   **********************************************************************/
-  template<string_literal SEP=".", typename T> requires is_named_v<T>
-    inline constexpr auto merge_named_flatten(T&& t) { return bbm::detail::named_flatten<"", SEP, true>(std::forward<T>(t));  }
       
 } // end bbm namespace
-
 
 namespace std {
   
@@ -466,5 +334,9 @@ namespace std {
 
 }
 
-  
+///////////////////
+// Include utils //
+///////////////////
+#include "named_util.h"
+
 #endif /* _BBM_NAMED_H_ */
