@@ -6,6 +6,11 @@
 #include "concepts/attribute.h"
 #include "concepts/convertible.h"
 
+#include "util/attribute_value.h"
+
+#include "core/stringconvert.h"
+
+
 /***********************************************************************/
 /*! \file attribute.h
 
@@ -73,6 +78,9 @@ namespace bbm {
 
     //! \brief Custom toString
     inline std::string toString(void) const { return bbm::toString(value()); }
+
+    //! \brief Custom fromString
+    static inline attribute fromString(const std::string& str) { return attribute( bbm::fromString<type>(str) ); }
   };
 
 
@@ -129,37 +137,13 @@ namespace bbm {
 
     //! \brief Custom toString
     inline std::string toString(void) const { return bbm::toString(value()); }
+
+    //! \brief Custom fromString
+    static inline attribute fromString(const std::string& str) { return attribute( bbm::fromString<type>(str) ); }
     
   private:
     type _value;
   };
-
-  /**********************************************************************/
-  /*! \brief return the value of an attribute, or if not an attribute the object
-    *********************************************************************/
-  template<typename T>
-    decltype(auto) value(T&& t)
-  {
-    if constexpr (concepts::attribute<std::decay_t<T>>) return t.value();
-    else return t;
-  }
-
-  
-  /*** Implementation detail ***/
-  namespace detail {
-    template<typename T> struct attribute_value { using type = T; };
-    template<typename T> requires bbm::concepts::attribute<T>
-      struct attribute_value<T>
-    {
-      using type = typename std::decay_t<T>::type;
-    };
-  } // end detail namespace
-
-  /**********************************************************************/
-  /*! \brief return the type of value(t)
-   **********************************************************************/
-  template<typename T>
-    using attribute_value_t = bbm::detail::attribute_value<std::decay_t<T>>::type;
 
   /**********************************************************************/
   /*! @{ \name Friend operators with attributes
