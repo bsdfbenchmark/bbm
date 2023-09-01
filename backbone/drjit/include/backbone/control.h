@@ -71,53 +71,6 @@ namespace backbone {
   
   
   /**********************************************************************/
-  /*! \brief Non-packet data, Packet look up
-   **********************************************************************
-  template<typename RET, typename C, typename Index> requires is_packet_v<RET> && is_packet_v<Index> && std::ranges::range<C> && is_index_v<Index> && std::convertible_to<bbm::iterable_value_t<C>, remove_packet_t<RET>> && (!is_packet_v<bbm::iterable_value_t<C>>)
-    inline RET lookup(C&& container, const Index& idx, const index_mask_t<Index>& mask=true)
-  {
-    // quick bailout
-    if(none(mask)) return RET();
-
-    // lookup
-    RET result;
-
-    static_assert(bbm::dependent_true_v<RET>, "NOT IMPLEMENTED");
-    for(size_t i=0; i != idx.Size; ++i)
-      if(mask[i])
-        result[i] = lookup<bbm::iterable_value_t<C>>(std::forward<C>(container), idx[i]);
-        
-    // Done.
-    return result;
-  }
-  */
-  
-  /**********************************************************************/
-  /*! \brief Packet data, Packet look up
-    *********************************************************************
-  template<typename RET, typename C, typename Index> requires is_packet_v<RET> && is_packet_v<Index> && std::ranges::range<C> && is_index_v<Index> && std::convertible_to<bbm::iterable_value_t<C>, RET> && is_packet_v<bbm::iterable_value_t<C>>
-    inline RET lookup(C&& container, const Index& idx, const index_mask_t<Index>& mask=true)
-  {
-    // quick bailout
-    if(none(mask)) return RET();
-    
-    // lookup
-    RET result;
-
-    static_assert(bbm::dependent_true_v<RET>, "NOT IMPLEMENTED");
-    for(size_t i=0; i != idx.Size; ++i)
-      if( mask[i] )
-      {
-        if(drjit::slice(idx, i) >= bbm::size(container)) throw bbm_out_of_range;
-        else drjit::slice(result, i) = drjit::slice(*(std::next(bbm::begin(container), drjit::slice(idx, i))), i); 
-      }
-    
-    // Done.
-    return result;
-  }
-  */
-
-  /**********************************************************************/
   /*! \brief Non-packet set
    **********************************************************************/
   template<typename VAL, typename C, typename Index> requires (!is_packet_v<Index>) && std::ranges::range<C> && is_index_v<Index> && std::convertible_to<VAL, bbm::iterable_value_t<C>>
@@ -131,43 +84,6 @@ namespace backbone {
     if(i >= bbm::size(container)) throw bbm_out_of_range;
     *(std::next(bbm::begin(std::forward<C>(container)), i)) = std::forward<VAL>(value);
   }
-  
-
-  /**********************************************************************/
-  /*! \brief Non-packet data, Packet set
-   **********************************************************************
-  template<typename VAL, typename C, typename Index> requires is_packet_v<VAL> && is_packet_v<Index> && std::ranges::range<C> &&  is_index_v<Index> && std::convertible_to<remove_packet_t<VAL>, bbm::iterable_value_t<C>> && (!is_packet_v<bbm::iterable_value_t<C>>)
-    inline void set(C&& container, const Index& idx, VAL&& value, const index_mask_t<Index>& mask=true)
-  {
-    // quick bailout
-    if(none(mask)) return;
-
-    static_assert(bbm::dependent_true_v<VAL>, "NOT IMPLEMENTED");
-    // set
-    for(size_t i=0; i != idx.Size; ++i)
-      set(std::forward<C>(container), drjit::slice(idx, i), drjit::slice(value, i), drjit::slice(mask, i));
-  }
-  */
-
-  /**********************************************************************/
-  /*! \brief Packet data, Packet set
-    *********************************************************************
-  template<typename VAL, typename C, typename Index> requires is_packet_v<VAL> && is_packet_v<Index> && std::ranges::range<C> && is_index_v<Index> && std::convertible_to<VAL, bbm::iterable_value_t<C>> && is_packet_v<bbm::iterable_value_t<C>>
-    inline void set(C&& container, const Index& idx, VAL&& value, const index_mask_t<Index>& mask=true)
-  {
-    // quick bailout
-    if(none(mask)) return;
-
-    static_assert(bbm::dependent_true_v<VAL>, "NOT IMPLEMENTED");
-    // set
-    for(size_t i=0; i != idx.Size; ++i)
-      if( drjit::slice(mask, i) )
-      {
-        if(drjit::slice(idx, i) >= bbm::size(container)) throw bbm_out_of_range;
-        drjit::slice(*(std::next(bbm::begin(container), drjit::slice(idx, i))), i) = drjit::slice(value, i); 
-      }
-  }
-  */
   
   /**********************************************************************/
   /*! \brief binary search
