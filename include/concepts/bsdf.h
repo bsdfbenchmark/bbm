@@ -14,19 +14,19 @@ namespace bbm {
 
   //! \brief Forward declaration
   template<typename CONF> requires concepts::config<CONF> struct bsdf_base;
-    
+
   namespace concepts {
-    
+
     /********************************************************************/
     /*! \brief bsdf concept
 
       Each bsdf must:
-      + concepts::config
+      + concepts::has_config
       + concepts::bsdfmodel
       + inherit from bsdf_base
     *********************************************************************/
     template<typename T>
-      concept bsdf = concepts::config<T> && concepts::bsdfmodel<T> &&  std::derived_from<std::decay_t<T>, bbm::bsdf_base<typename std::decay_t<T>::Config>>;
+    concept bsdf = concepts::has_config<T> && concepts::bsdfmodel<T> && std::derived_from<std::decay_t<T>, bbm::bsdf_base<typename std::decay_t<T>::Config>>;
     
   } // end concepts namespace
 } // end bbm namespace

@@ -21,12 +21,12 @@ namespace bbm {
     /*! \brief loss concept
 
       Each loss must:
-      + concepts::config
+      + concepts::has_config
       + concepts::lossfunction
       + inherit from loss_base
     *********************************************************************/
     template<typename T>
-      concept loss = concepts::config<T> && concepts::lossfunction<T> && std::derived_from<std::decay_t<T>, bbm::loss_base<typename std::decay_t<T>::Config>>;
+      concept loss = concepts::has_config<T> && concepts::lossfunction<T> && std::derived_from<std::decay_t<T>, bbm::loss_base<typename std::decay_t<T>::Config>>;
 
   } // end concepts namespace
 } // end bbm namespace

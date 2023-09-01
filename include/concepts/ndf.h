@@ -18,7 +18,7 @@ namespace bbm {
     /*! \brief ndf concept
 
       Each ndf requires:
-      + concepts::config
+      + concepts::has_config
       + concepts::named
       + Value/Spectrum eval(const Vec3d& halfway, Mask mask=true) const
       + Vec3d sample(const Vec3d& view, const Vec2d& xi, Mask mask=true) const
@@ -28,7 +28,7 @@ namespace bbm {
     template<typename NDF>
       concept ndf = requires(const NDF& ndf)
     {
-      requires concepts::config<NDF>;
+      requires concepts::has_config<NDF>;
       requires concepts::named<NDF>;
       
       /******************************************************************/

@@ -22,7 +22,7 @@ namespace bbm {
     /*! \brief bsdfmodel concept
 
       Each bsdfmodel requires:
-      + concepts::config
+      + concepts::has_config
       + concepts::named
       + Spectrum eval(const Vec3d& in, const Vec3d& out, BsdfFlag component=bsdf_flag::All, unit_t unit=unit_t::Radiance, Mask mask=true) const
       + BsdfSample sample(const Vec3d& out, const Vec2d& xi, BsdfFlag component=bsdf_flag::All, unit_t unit=unit_t::Radiance, Mask mask=true) const
@@ -32,7 +32,7 @@ namespace bbm {
     template<typename BSDFMODEL>
       concept bsdfmodel = requires(const BSDFMODEL& model)
     {
-      requires concepts::config<BSDFMODEL>;
+      requires concepts::has_config<BSDFMODEL>;
       requires concepts::named<BSDFMODEL>;
       
       /******************************************************************/

@@ -20,7 +20,7 @@ namespace bbm {
     /*! \brief loss function concept
 
       Each loss function requires:
-      + concepts::config
+      + concepts::has_config
       + update(void) method that initializes the loss. This method should be called at the beginning of each optimization step()
       + Value_t operator()(Mask=true) const method that returns the loss.
       + The returned loss should support addition.
@@ -28,7 +28,7 @@ namespace bbm {
     template<typename LOSSFUNC>
       concept lossfunction = requires(std::decay_t<LOSSFUNC>& func)
     {
-      requires concepts::config<LOSSFUNC>;
+      requires concepts::has_config<LOSSFUNC>;
       { func.update() };
       { std::as_const(func)() } -> std::same_as<Value_t<LOSSFUNC>>;
       { std::as_const(func)(std::declval<typename std::decay_t<Mask_t<LOSSFUNC>>>()) } -> std::same_as<Value_t<LOSSFUNC>>;

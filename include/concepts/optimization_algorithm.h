@@ -15,7 +15,7 @@ namespace bbm {
     /*! \brief optimization_algorithm concept
 
       Each optimization algorithm has the following:
-      + concepts::config
+      + concepts::has_config
       + Value step(void) : take one optimization step
       + void reset(void) : reset the internal state of the algorithm
       + Mask is_converged(void) const : true if the algorithm has converged
@@ -24,7 +24,7 @@ namespace bbm {
     template<typename OPT>
       concept optimization_algorithm = requires(OPT& opt)
     {
-      requires concepts::config<OPT>;
+      requires concepts::has_config<OPT>;
       
       //! \brief step function
       { opt.step() } -> std::same_as<Value_t<OPT>>;

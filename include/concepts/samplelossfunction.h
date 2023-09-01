@@ -19,7 +19,7 @@ namespace bbm {
     /* ! \brief samplelossfunction concept
        
        A sample loss function computes the loss over a single sample:
-       + concepts::config
+       + concepts::has_config
        + Value operator()(const Vec3d& in, const Vec3d& out, const Spectrum& value, const Spectrum& reference) const
        + the result of the operator() must support addition
 
@@ -27,7 +27,7 @@ namespace bbm {
     template<typename SAMPLELOSS>
       concept samplelossfunction = requires(const SAMPLELOSS& loss)
     {
-      requires concepts::config<SAMPLELOSS>;
+      requires concepts::has_config<SAMPLELOSS>;
       
       { loss(std::declval<Vec3d_t<SAMPLELOSS>>(), std::declval<Vec3d_t<SAMPLELOSS>>(), std::declval<Spectrum_t<SAMPLELOSS>>(), std::declval<Spectrum_t<SAMPLELOSS>>()) } -> std::same_as<Value_t<SAMPLELOSS>>;
       requires concepts::has_addition<Value_t<SAMPLELOSS>>;

@@ -17,7 +17,7 @@ namespace bbm {
   namespace concepts {
 
   /**********************************************************************/
-  /*! \brief config_struct concept
+  /*! \brief config concept
 
     Each config struct contains:
     + concepts::named
@@ -28,7 +28,7 @@ namespace bbm {
       wavelength in each channel in nm.
    **********************************************************************/
   template<typename T>
-    concept config_struct = requires
+    concept config = requires
   {
     requires concepts::named<T>;
     
@@ -45,12 +45,12 @@ namespace bbm {
 
     
   /*********************************************************************/
-  /*! \brief config
+  /*! \brief has_config
 
     Check if the object has a Config typedef.
   **********************************************************************/
   template<typename T>
-    concept config = requires {typename std::decay_t<T>::Config;};
+    concept has_config = requires {typename std::decay_t<T>::Config;};
 
     
   /*********************************************************************/

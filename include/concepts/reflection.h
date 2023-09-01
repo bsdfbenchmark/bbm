@@ -1,6 +1,8 @@
 #ifndef _BBM_REFLECTION_CONCEPT_H_
 #define _BBM_REFLECTION_CONCEPT_H_
 
+#include <utility>
+
 /************************************************************************/
 /*! \file refection.h
 
@@ -10,6 +12,12 @@
 *************************************************************************/
 
 namespace bbm {
+
+  namespace reflection {
+    // forward declaration
+    template<typename T> struct bbm_enum;
+  } // end reflection namespace
+    
   namespace concepts {
     namespace reflection {
       
@@ -48,6 +56,16 @@ namespace bbm {
        ******************************************************************/
       template<typename T>
         concept supported = basetypes<T> || attributes<T>;
+
+      
+      /******************************************************************/
+      /*! \brief concept to check if a enum supports reflection
+       ******************************************************************/
+      template<typename T>
+        concept enumerate = requires
+      {
+        { bbm::reflection::bbm_enum<T>::values() };
+      };
       
     } // end reflection namespace
   } // end concepts namespace

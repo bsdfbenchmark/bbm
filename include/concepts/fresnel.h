@@ -18,7 +18,7 @@ namespace bbm {
     /*! \brief fresnel concept
 
       Each fresnel implementation has:
-      + concepts::config
+      + concepts::has_config
       + typename parameter_type
       + static Value|Spectrum eval(const parameter_type& eta, const Value& cosTheta, Mask Mask=true)
       
@@ -26,7 +26,7 @@ namespace bbm {
     template<typename Fresnel>
       concept fresnel = requires
     {
-      requires concepts::config<Fresnel>;
+      requires concepts::has_config<Fresnel>;
       typename std::decay_t<Fresnel>::parameter_type;
       
       //! \brief eval method

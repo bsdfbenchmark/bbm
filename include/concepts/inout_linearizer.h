@@ -19,7 +19,7 @@ namespace bbm {
       on the joint incident and outgoing direction sphere.
       
       Each inout_linearizer contains the following:
-      + concept::config
+      + concept::has_config
       + Size_t size(void) const:  the number of discrete direction-pairs
       + Vec3dPair opeator()(Size_t index, Mask mask=true) const: returns the index-th direction pair
       + Size_t operator()(const Vec3d& in, const Vec3d& out, Mask mask=true) const: the inverse operation
@@ -27,7 +27,7 @@ namespace bbm {
     template<typename T>
       concept inout_linearizer = requires(const T& t)
     {
-      requires concepts::config<T>;
+      requires concepts::has_config<T>;
       { t.size() } -> std::same_as<Size_t<T>>;
       
       { t.operator()(std::declval<Size_t<T>>(), std::declval<Mask_t<T>>()) } -> std::same_as<Vec3dPair_t<T>>;

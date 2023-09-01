@@ -17,13 +17,13 @@ namespace bbm {
     /*! \brief maskingshadowing concept
 
       Each Masking-Shadowing requires:
-      + concepts::config
+      + concepts::has_config
       + static Value/Spectrum eval(const NDF&, const Vec3d&, const Vec3d& in, const Vec3d& out, const Vec3d& m, Mask mask=true)
     *********************************************************************/
     template<typename MS>
       concept maskingshadowing = requires
     {
-      requires concepts::config<MS>;
+      requires concepts::has_config<MS>;
 
       /******************************************************************/
       /*! \brief Evaluate the masking-shaodinw function for a given ndf, and in/out/NDF normal vector.
