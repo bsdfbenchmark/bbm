@@ -63,7 +63,7 @@ namespace bbm {
           auto data_size = bbm::size(data(x,y));
 
           for(size_t c = 0; c < num_channels; c++)
-            buffer_ref[c] = (channels[c] >= 0 && size_t(channels[c]) < data_size) ? float(data_ref[channels[c]]) : 0.0f;
+            buffer_ref[c] = (channels[c] >= 0 && size_t(channels[c]) < data_size) ? bbm::cast<float>(data_ref[channels[c]]) : 0.0f;
         }
       
       // ensure the data is stored as little endian
