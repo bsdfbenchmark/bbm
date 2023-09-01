@@ -2,7 +2,7 @@
 #define _BBM_ARG_H_
 
 #include <ostream>
-#include "util/toString.h"
+#include "concepts/stringconvert.h"
 #include "util/reference.h"
 #include "util/typestring.h"
 #include "util/string_literal.h"

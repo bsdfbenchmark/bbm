@@ -1,6 +1,8 @@
 #ifndef _BBM_ARGS_H_
 #define _BBM_ARGS_H_
 
+#include "concepts/stringconvert.h"
+
 #include "core/arg.h"
 #include "core/error.h"
 
@@ -9,6 +11,7 @@
 #include "util/to_string_literal.h"
 #include "util/macro_util.h"
 #include "util/make_from.h"
+#include "util/named.h"
 
 /************************************************************************/
 /*! \file args.h
@@ -278,11 +281,18 @@ namespace bbm {
      ********************************************************************/
     static constexpr size_t size = sizeof...(ARGS);
 
+    //! \brief type of the IDX argument
     template<size_t IDX> using type = std::tuple_element_t<IDX, std::tuple<ARGS...>>;
+
+    //! \brief name of the IDX argument
+    template<size_t IDX> static constexpr string_literal name = std::tuple_element_t<IDX, std::tuple<ARGS...>>::name;
     
     //! \brief Returns a tuple of all arguments' values
     inline constexpr auto values(void) const { return _value( std::make_index_sequence<sizeof...(ARGS)>{} ); }
 
+    //! \brief type of values()
+    using values_t = bbm::named< std::tuple<typename ARGS::type...>, ARGS::name... >;
+    
     //! \brief Get the IDX-th argument (bbm::arg type)
     template<size_t IDX> inline constexpr decltype(auto) get(void) { return std::get<IDX>(_values); }
     template<size_t IDX> inline constexpr decltype(auto) get(void) const { return std::get<IDX>(_values); }
@@ -312,8 +322,8 @@ namespace bbm {
     template<string_literal Name, typename T=void, typename D=void> inline constexpr decltype(auto) value(arg<T,Name,D> = arg<T,Name,D>{}) { return get<Name>().value(); }
     template<string_literal Name, typename T=void, typename D=void> inline constexpr decltype(auto) value(arg<T,Name,D> = arg<T,Name,D>{}) const { return get<Name>().value(); }
     //! @}
-    
-    //  private:  DEBUG!!!
+
+  private:
     /********************************************************************/
     /*! \brief Lookup a name.
 
@@ -553,12 +563,12 @@ namespace bbm {
     /*! \brief Return the value of all arguments
 
       \param index_sequence = [0, sizeof(ARGS)]
-      \returns tuple of argument values 
+      \returns named tuple of argument values 
      ********************************************************************/
     template<size_t... IDX>
       inline constexpr auto _value(std::index_sequence<IDX...>) const
     {
-      return std::forward_as_tuple( value<IDX>()... );
+      return make_named<name<IDX>...>(std::forward_as_tuple( value<IDX>()... ));
     }
     
   private:
@@ -582,6 +592,7 @@ namespace bbm {
     });
     return s;
   }
+
 } // end bbm namespace
 
 

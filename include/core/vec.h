@@ -58,6 +58,7 @@ namespace bbm {
     //! @}
 
   } // end vec namespace
+
 } // end bbm namespace
 
 #endif /* _BBM_VEC_H_ */

@@ -26,7 +26,7 @@ namespace bbm {
     //! @}
 
   } // end color namespace
-
+  
 } // end bbm namespace
 
 #endif /* _BBM_COLOR_H_ */

@@ -5,10 +5,8 @@
 
 #include "util/tuple.h"
 #include "util/named.h"
-#include "util/toString.h"
 #include "util/reflection.h"
 #include "util/apply_all.h"
-#include "core/attribute.h"
 
 /************************************************************************/
 /*! \file backbone.h
@@ -41,16 +39,17 @@
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::backbone::ordered, TYPE );       \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::backbone::horizontal, TYPE );    \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::backbone::control, TYPE );       \
-  BBM_CHECK_RAW_CONCEPT( bbm::concepts::backbone::is_rng, rng<TYPE> );   \
+  BBM_CHECK_RAW_CONCEPT( bbm::concepts::backbone::is_rng, bbm::rng<TYPE> ); \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::has_logical_operators, bbm::mask_t<TYPE> ); \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::has_bit_operators, bbm::mask_t<TYPE> ); \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::has_basic_math, bbm::replace_scalar_t<TYPE, size_t>); \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::has_increment, bbm::replace_scalar_t<TYPE, size_t> ); \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::has_decrement, bbm::replace_scalar_t<TYPE, size_t> ); \
   BBM_CHECK_RAW_CONCEPT( bbm::concepts::backbone::if_diff_gradient, TYPE ); \
+  BBM_CHECK_RAW_CONCEPT( bbm::concepts::stringconvert, TYPE );        \
 
 
-/*** Forward Declarations for gradient ***/
+/*** Forward Declarations for backbone ***/
 namespace backbone {
   template<typename T> remove_diff_t<T>& detach_gradient(T&);
   template<typename T> void track_gradient(T&, bool);
@@ -59,7 +58,8 @@ namespace backbone {
   template<typename T> void forward_gradient(T&);
   template<typename T> void backward_gradient(T&);
 
-  std::string toString(void) { return ""; }
+  template<typename T> requires false std::string toString(const T&);
+  template<typename T> requires false T fromString(const std::string&);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -90,15 +90,13 @@ namespace bbm {
   using backbone::complex;
   //! @}
 
-  //! \brief Import custom toString
-  using backbone::toString;
-
   //! @{ \name random number generator
   using backbone::seed_t;
   using backbone::default_seed;
   using backbone::rng;
   //! @}
-  
+
+
   /**********************************************************************/
   /*! \brief Helper macro: extend existing methods to support attribute types
    **********************************************************************/
@@ -484,7 +482,28 @@ namespace bbm {
     backbone::backward_gradient(t);
   }
   //! @}
-  
+
+  /**********************************************************************/
+  /*! \brief string convert of backbone types
+    *********************************************************************/
+  template<typename T> requires requires(const T& t)
+  {
+    { backbone::toString(t) } -> std::convertible_to<std::string>;
+    { backbone::fromString<T>(std::declval<std::string>()) } -> std::same_as<T>;
+  }
+    struct string_converter<T>
+  {
+    static inline std::string toString(const T& t)
+    {
+      return backbone::toString(t);
+    }
+
+    static inline T fromString(const std::string& str)
+    {
+      return backbone::fromString<T>(str);
+    }
+  };
+
 } // end bbm namespace
 
 
@@ -501,5 +520,6 @@ namespace bbm {
 #include "concepts/backbone/gradient.h"
 #include "concepts/backbone/complex.h"
 #include "concepts/backbone/random.h"
+#include "concepts/backbone/stringconvert.h"
 
 #endif /* _BBM_BACKBONE_H_ */
