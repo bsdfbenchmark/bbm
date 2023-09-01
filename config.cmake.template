@@ -25,6 +25,12 @@ set(BBM_NAME "bbm")
 #########################################################################
 set(BBM_BACKBONE "native")
 
+# BBM_BSDFMODELS: list of BSDF models to include in bbm_bsdfmodels.h These are
+# also the models that exported (e.g., to Python or to fromString); default
+# "bsdfmodel/*h staticmodel/*h" (i.e., all models)
+#########################################################################
+#set(BBM_BSDFMODELS "bsdfmodel/*h" "staticmodel/*h")
+
 # BBM_EXPORTERS: master flag to determine whether to compile exporters
 #                ON/OFF, default = OFF
 #########################################################################
@@ -42,6 +48,18 @@ set(BBM_BINARIES OFF)
 #########################################################################
 set(BBM_PYTHON_LIBRARIES OFF)
 
+# BBM_BSDF_FORWARD: enable/disable flexible argument passing for BSDF methods, default = ON
+#########################################################################
+#set(BBM_BSDF_FORWARD ON)
+
+# BBM_DEFAULT_BSDF_IMPORTER: specify the default BSDF importer:
+#   * "python" : use the python interpreter; if BBM_EMBED_CONFIG is set, then
+#                embed the interpreter
+#   * "string" : use the fromString method (default)
+#########################################################################
+#set(BBM_DEFAULT_BSDF_IMPORTER "python")
+#set(BBM_EMBED_CONFIG "floatRGB")
+
 # PYBIND11_PATH: pybind11 path; by default search in ext/pybind11
 #########################################################################
 #set(PYBIND11_PATH "")
@@ -51,11 +69,6 @@ set(BBM_PYTHON_LIBRARIES OFF)
 #########################################################################
 set(BBM_PYTHON_CONFIG "floatRGB" "floatPacketRGB" "floatDiffRGB")
 
-# BBM_BSDF: if BBM_PYTHON is 'OFF' use the BSDF specified in BBM_BSDF in
-#           applications that use the python interpreter to specify a BSDF
-#           (e.g., renderSphere).
-#########################################################################
-set(BBM_BSDF "lambertian<floatRGB>()")
 
 
 

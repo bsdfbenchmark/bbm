@@ -2,13 +2,13 @@
 /*! \file bbm_python.h
     \brief Python support for BBM
 
-    \param bbm::bsdfmodelclass = the class name of the BSDF model. 
+    \param bsdfmodel = the class name of the BSDF model to export. 
 
     Assumes that:
     1.  the bsdfmodelclass has a single (non-defaulted) template parameter to specify
     the Configuration.  
     2. the BSDFMDOEL has a static constexpr string_literal name.
-    3. the BSDFMODEL should have a constructor with a named arg list and constructor_arg_list_t is defined.
+    3. the BSDFMODEL should have a constructor with a named arg list and constructor_args_t is defined.
 
     The macro will then create a default trampoline function that constructs a
     bsdf_ptr based on the parameters passed via python (args and kwargs). The
