@@ -13,6 +13,7 @@
 #include "backbone/horizontal.h"
 #include "backbone/random.h"
 #include "backbone/python.h"
+#include "backbone/stringconvert.h"
 
 /************************************************************************/
 /*! \file backbone.h
@@ -25,11 +26,11 @@ namespace bbm {
 
   /*** Implementation detail ***/
   namespace detail {
-    template<typename VALUE, string_literal NAME>
+    template<typename VALUE, string_literal NAME, typename CONF>
       struct rgbConfig
     {
       static constexpr string_literal name = NAME;
-      using Config = rgbConfig<VALUE,NAME>;
+      using Config = CONF;
       using Value = VALUE;
       using Spectrum = backbone::color<Value>;
       static Spectrum wavelength(void) { return {0.645, 0.526, 0.444}; } // in micron
@@ -37,8 +38,8 @@ namespace bbm {
   }
   
   /*** Default configurations ***/
-  struct floatRGB : public detail::rgbConfig<float, "floatRGB"> {};
-  struct doubleRGB : public detail::rgbConfig<double, "doubleRGB"> {};
+  struct floatRGB : public detail::rgbConfig<float, "floatRGB", floatRGB> {};
+  struct doubleRGB : public detail::rgbConfig<double, "doubleRGB", doubleRGB> {};
 
 } // end bbm namespace
 

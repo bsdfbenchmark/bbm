@@ -52,6 +52,9 @@ namespace backbone {
       template<typename... U> requires (sizeof...(U) > 1)
         array_impl(U&&... u) : base_type{T(u)...} {}
 
+      //! \brief Construct from an std::array
+      array_impl(std::array<T,N>&& src) : base_type(std::forward<decltype(src)>(src)) {}
+      
       //! \brief assignment operator of array
       template<typename U> requires requires(T a, U b) {{a=b};}
         array_impl& operator=(const array_impl<U,N>& src)
@@ -216,7 +219,7 @@ namespace backbone {
    ********************************************************************/
   template<typename T> 
     static constexpr size_t array_size = detail::array_size< std::decay_t<T> >::value;
-    
+  
 } // end backbone namespace
 
 #endif /* _BBM_NATIVE_ARRAY_H_ */

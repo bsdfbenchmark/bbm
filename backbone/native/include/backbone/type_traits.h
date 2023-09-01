@@ -28,9 +28,16 @@ namespace backbone {
   template<typename T>
     using value_t = typename detail::value_impl<std::decay_t<T>>::type;
 
+  /*** Implementation details for scalar_t ***/
+  namespace detail {
+    template<typename T> struct scalar_impl { using type = T; };
+    template<typename T, size_t N> struct scalar_impl<array<T,N>> { using type = typename scalar_impl<std::decay_t<T>>::type; };
+    template<typename T> struct scalar_impl<complex<T>> { using type = typename scalar_impl<std::decay_t<T>>::type; };
+  } // en detail namespace
+  
   //! \brief Scalar trait
   template<typename T>
-    using scalar_t = value_t<T>;
+    using scalar_t = typename detail::scalar_impl<std::decay_t<T>>::type;
 
   /*** Implementation details for replace_value_t ***/
   namespace detail {
