@@ -99,12 +99,12 @@ inline Value P2(Value r, Value p, Value gamma=20)
 
   // approximate with a midpoint method for a 1000 intervals
   Value integral = 0;
-  for(Value x=1; x > deltax; x -= deltax)
+  for(Value x=1; bbm::cast<bool>(x > deltax); x -= deltax)
   {
     Value delta_q = conv(x - deltax) - conv(x);
     Value q = conv(x - 0.5*deltax);
 
-    if(!bbm::isnan(delta_q)) integral += delta_q * bbm::exp(-bbm::pow(r2 + q*q, p));
+    if(bbm::none(bbm::isnan(delta_q))) integral += delta_q * bbm::exp(-bbm::pow(r2 + q*q, p));
   }
 
   // The above integral is from 0...+infinity. The function is symmetric,
@@ -189,24 +189,26 @@ inline auto G1series(const Value& p, const Value& gamma=20)
   
   for(size_t j=1; j < size; ++j)
   {
+    std::cerr << j << ", ";
+    
     Value x = (j+1) / Value(size);      // == T ( we drop the 'j' index)
     Value tanTheta = bbm::rcp(conv(x));
 
-    if(!bbm::isinf(tanTheta))           // theta != grazing angle
+    if(bbm::none(bbm::isinf(tanTheta)))           // theta != grazing angle
     {
       Value delta_r = conv(x - delta_x) - conv(x);
       Value r = conv(x - 0.5*delta_x);
       Value p2 = P2(r, p) * delta_r;    // \f$ P_2(r_j) \f$
 
       integral[j] = 0;
-      if(prevTanTheta > 0) integral[j] = (integral[j-1] + P_j) * tanTheta / prevTanTheta - P_j;  // 1st term
-      if(r*tanTheta > 1) integral[j] += (r*tanTheta-1)*p2;  // 2nd term
+      if(bbm::any(prevTanTheta > 0)) integral[j] = (integral[j-1] + P_j) * tanTheta / prevTanTheta - P_j;  // 1st term
+      if(bbm::any(r*tanTheta > 1)) integral[j] += (r*tanTheta-1)*p2;  // 2nd term
 
       // save for next step
       prevTanTheta = tanTheta;
       P_j += p2;
     
-      if(bbm::isnan(integral[j]))
+      if(bbm::any(bbm::isnan(integral[j])))
         throw std::runtime_error("UNEXPECTED");
     }
     else integral[j] = tanTheta;        // theta is at grazing angle => +infinity
@@ -238,7 +240,7 @@ std::string_view header[] = {
   "  namespace precomputed {                                                 ",
   "    namespace holzschuchpacanowski {                                      ",
   "",
-  "      const tab<float, std::array{100,1000},                              ",
+  "      static const tab<float, std::array{100,1000},                       ",
   "           decltype( [](const auto& p) { return 5.0 / p - 1.0; } ),       ",
   "           decltype( [](const auto& t) { return bbm::exp(-bbm::exp(bbm::log(bbm::rcp(t)) * 0.05)) * 1000.0 - 1.0; } ) ",
   "         > G1 = {                                                         "
@@ -292,7 +294,7 @@ int main(int argc, char** argv)
     // write out precomputed values for G1
     for(size_t i=0; i < integral.size(); ++i)
     {
-      ofs << integral[i];
+      ofs << bbm::toString( integral[i] );
       if(p_idx+1 != 100 || i+1<integral.size()) ofs << ", ";
     }
     ofs << std::endl;

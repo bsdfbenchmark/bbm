@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 /************************************************************************/
 /*! \file convolution.cpp
@@ -78,6 +79,7 @@
 // Setup BBM core
 ////////////////////
 #include "bbm_core.h"
+#include "core/precompute.h"
 #include "optimizer/compass.h"
 using namespace bbm;
 BBM_IMPORT_CONFIG( floatRGB );
@@ -117,7 +119,7 @@ auto u_index = [](const auto& u, const auto&, const auto&, const auto&)
    if(bbm::any(mask)) index = bbm::select(mask, (u-50.0) / 10.0 + 37.0, index);
    return index;
  };
-
+ 
 auto c_index = [](const auto&, const auto& c, const auto&, const auto&)
  {
    return 5.0*(3.02 - c);
@@ -134,9 +136,10 @@ auto beta_index = [](const auto&, const auto&, const auto& p, const auto& beta)
  };
 //! @}            
 
+
 /************************************************************************/
 /*! @{ \name Index to Coord
-/************************************************************************/
+ ************************************************************************/
 auto u_coord = [](const auto& u_index)
  {
    if(u_index > 37) return (u_index - 37.0)*10.0 + 50.0;
@@ -304,11 +307,11 @@ struct lossfunc
 {
   BBM_IMPORT_CONFIG( floatRGB );
 
-  lossfunc(const Vec2d& param, const std::vector<Scalar>& reference, Scalar c) : _param(param), _reference(reference), _c(c) {}
+  lossfunc(const Vec2d& param, const std::vector<Scalar>& reference, Scalar c) : _c(c), _param(param), _reference(reference) {}
   void update(void) {}
 
   //! \brief Eval S_HS with normalization
-  inline auto S(Scalar cosTheta, Scalar u, Scalar c) const
+  inline auto S(Value cosTheta, Value u, Scalar c) const
   {
     auto c2 = cosTheta*cosTheta;
     auto s2 = 1 - c2;
@@ -321,7 +324,7 @@ struct lossfunc
   //! \brief Eval the loss
   Value operator()(Mask=true) const
   {
-    Scalar err = 0;
+    Value err = 0;
     for(size_t s=0; s < _reference.size(); ++s)
     {
       auto sinTheta = 1.0 - Value(s) / Value(_reference.size());
@@ -355,7 +358,7 @@ using fit_t = tab< vec2d<float>, std::array{u_size,c_size,p_size,beta_size}, dec
 
 *************************************************************************/
 template<bool CosScale=false>
-  inline fit_t fitZonalHarmonics(const zhconv_t& evaluation, size_t max_samples=1000, size_t max_itr=4096)
+  inline fit_t fitZonalHarmonics(const zhconv_t& evaluation, size_t max_itr=4096)
 {
   Scalar percentage = 0.0;
   Scalar delta = 100.0 / Scalar(evaluation.size());
@@ -390,19 +393,18 @@ template<bool CosScale=false>
           lossfunc<CosScale> loss(param, eval, c);
           compass opt(loss, param, Vec2d(0.0,0.0), Vec2d(10.0, 50.0), Constants::Epsilon(), 1, 0.5, 2.0);
 
-          size_t i=0;
-          for(i=0; i < max_itr && !opt.is_converged(); ++i)
+          for(size_t i=0; i < max_itr && bbm::none(opt.is_converged()); ++i)
             auto err = opt.step();
 
           // print warning if not converged
-          if(!opt.is_converged())
+          if(bbm::none(opt.is_converged()))
           {
             std::cout << " WARNING: optimization not converged (error = " << loss() << " init = " << init << ", u = " << u << ", c = " << c << ", beta = " << beta << ", p = " << p << ")" << std::endl;
             //exit(1);
           }
           
           // store
-          fit(u_idx, c_idx, p_idx, beta_idx) = param;
+          fit(u_idx, c_idx, p_idx, beta_idx) = bbm::cast<vec2d<float>>(param);
 
           // use previous result as next init
           init = param;
@@ -443,7 +445,7 @@ std::string_view header[] = {
   "  namespace precomputed {                                                 ",
   "    namespace holzschuchpacanowski {                                      ",
   "",
-  "      const tab<float, std::array{25},                                    ",
+  "      static const tab<float, std::array{25},                             ",
   "           decltype( [](const auto& p) { return (5.0 - p) * 5.0; } )      ",
   "         > betamax = {                                                    ",
   "           0.058, 0.060, 0.062, 0.064, 0.066,       // p=5.0->4.2         ",
@@ -456,7 +458,7 @@ std::string_view header[] = {
 };
 
 std::string_view data_start[] = {
-  "      const tab<named<std::tuple<float,float>, \"scale\", \"u\"> , std::array{43,11,25,10},  // (u,c,p,beta) ",
+  "      static const tab<named<std::tuple<float,float>, \"scale\", \"u\"> , std::array{43,11,25,10},  // (u,c,p,beta) ",
   "           decltype( [](const auto& u, const auto&, const auto&, const auto&)",
   "                     {                                                    ",
   "                       std::decay_t<decltype(u)> index = 0;               ",
@@ -559,7 +561,7 @@ int main(int argc, char** argv)
           
             //ofs << "// beta = " << beta << std::endl;
             auto ug = fit(u_idx, c_idx, p_idx, beta_idx);
-            ofs << "{" << ug[0] << ", " << ug[1] << "}";
+            ofs << "{" << bbm::toString(ug[0]) << ", " << bbm::toString(ug[1]) << "}";
             if(u_idx+1 != u_size || c_idx+1 != c_size || p_idx+1 != p_size || beta_idx+1 != beta_size) ofs << ", ";
           }
 

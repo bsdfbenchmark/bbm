@@ -11,7 +11,7 @@ namespace bbm {
   namespace precomputed {                                                 
     namespace holzschuchpacanowski {                                      
 
-      tab<float, std::array{100,1000},                                    
+      static const tab<float, std::array{100,1000},                                    
            decltype( [](const auto& p) { return 5.0 / p - 1.0; } ),       
            decltype( [](const auto& t) { return bbm::exp(-bbm::exp(bbm::log(bbm::rcp(t)) * 0.05)) * 1000.0 - 1.0; } ) 
          > G1 = {                                                         

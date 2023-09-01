@@ -42,7 +42,7 @@ std::string_view header[] = {
   "  namespace precomputed {                                                 ",
   "    namespace holzschuchpacanowski {                                      ",
   "",
-  "      const tab<float, std::array{256},                                   ",
+  "      static const tab<float, std::array{256},                            ",
   "           decltype( [](const auto& p) { return p * 256.0 / 5.0; } )      ",
   "         > distributionNormalization = {                                  "
 };

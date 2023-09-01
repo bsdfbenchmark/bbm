@@ -11,7 +11,7 @@ namespace bbm {
   namespace precomputed {                                                 
     namespace holzschuchpacanowski {                                      
 
-      const tab<float, std::array{256},                                   
+      static const tab<float, std::array{256},                                   
            decltype( [](const auto& p) { return p * 256.0 / 5.0; } )      
          > distributionNormalization = {                                  
         0, 9.32554e-68, 2.91892e-27, 7.39356e-16, 8.59034e-11, 4.97486e-08, 2.47968e-06, 3.3303e-05, 

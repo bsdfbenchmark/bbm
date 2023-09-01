@@ -141,7 +141,7 @@ inline Value integralSH(const Value& sinTheta, const Value& b2, const Value& c)
   // integral f = [1-sinTheta ... 1+sinTheta]
   Value integral = 0; 
   Value df = 0.01 * Constants::Pi() / 180.0;
-  for(Value f=1-sinTheta; f <= sinTheta+1; f+=df)
+  for(Value f=1-sinTheta; bbm::cast<bool>(f <= sinTheta+1); f+=df)
   {
     auto x = (f*f - 1.0 + sinTheta*sinTheta) / (2.0*sinTheta);
     auto alpha = 2*bbm::safe_acos(x/f);
@@ -177,7 +177,7 @@ std::string_view header[] = {
   "  namespace precomputed {                                                 ",
   "    namespace holzschuchpacanowski {                                      ",
   "",
-  "      const tab<float, std::array{100,100,100},                           ",
+  "      static const tab<float, std::array{100,100,100},                    ",
   "           decltype( [](const auto& b) { return 101.0*(10.0/(b+10.0))-1.0; } ),",
   "           decltype( [](const auto& c) { return 101.0*(c-1)/c-1.0; } ),   ",
   "           decltype( [](const auto& sinTheta) { return sinTheta*100.0; } )",
@@ -237,7 +237,7 @@ int main(int argc, char** argv)
         auto integral = integralSH(sinTheta, bbm::rcp(inv_b*inv_b), c);
 
         // write out precomputed value
-        ofs << integral;
+        ofs << bbm::toString(integral);
         if(bIndex+1 != samples || cIndex+1 != samples || sinThetaIndex+1 != samples) ofs << ", ";
       }
       
